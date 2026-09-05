@@ -67,6 +67,31 @@ API quota.
 - Every entry is modelled as a licensed blood bank. In reality most hospitals
   hold no stock and source from a smaller number of licensed banks.
 
+## Donor mobilisation
+
+Alerts fire on a blood centre's own stock falling below a per-group floor,
+never on a patient's case. That choice is deliberate. India's National Blood
+Policy commits to phasing out replacement donation in favour of 100%
+voluntary non-remunerated donation, and a patient-linked broadcast is the
+route by which paid donors — banned by the 1996 Supreme Court judgment —
+re-enter the system. `donor_alerts` has no request or patient column, so the
+link cannot be made later by accident.
+
+Eligibility is a Postgres function: exact group match, 90 days since last
+donation, within radius, active, and not alerted in the past 30 days. The
+rate limit lives inside the eligibility query rather than at the call site,
+so it cannot be skipped. Donors give whole blood of their own group, so the
+compatibility matrix is not applied here — it governs bank stock, not donors.
+
+The register is not readable with the anon key. That key ships in the
+frontend bundle, so the RLS policy allows self-registration and nothing else;
+reads happen through the service role in an edge function.
+
+Floors are set per group, higher for rarer ones. Those numbers are judgement,
+not evidence.
+
+Not yet built: any delivery channel. `donor_alerts` records who would be
+contacted. Nothing is sent.
 ## Running it
 
 1. Run schema.sql, then seed.sql, in the Supabase SQL editor
