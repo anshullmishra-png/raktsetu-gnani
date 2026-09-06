@@ -66,7 +66,34 @@ API quota.
   real for rare groups, but it is a two-hour round trip in Bengaluru traffic.
 - Every entry is modelled as a licensed blood bank. In reality most hospitals
   hold no stock and source from a smaller number of licensed banks.
+## Hold lifecycle
 
+A hold has three terminal states, each written by a Postgres function that
+takes a row lock and refuses to run twice.
+
+`fulfilled` — the attendant collected. No stock change, because
+`place_hold_atomic` already decremented at placement. The point is to stop
+the expiry sweep returning units that physically left the building.
+
+`cancelled` — the bank told us on the call it cannot supply. The Bolna
+webhook calls `cancel_hold_atomic`, which marks the hold and returns the
+units in one transaction. Before this, the voice result was recorded but
+never acted on: the hospital kept a reservation against blood the bank had
+just said it did not have.
+
+`expired` — the thirty-minute window passed with no collection. The sweep
+selects on `status = 'active'` rather than on a boolean, so fulfilled and
+cancelled holds are structurally invisible to it rather than accidentally
+skipped.
+
+Each function returns `ok: false` with a reason instead of throwing, so the
+dispatch agent can treat a refusal as a normal outcome and move to the next
+bank.
+
+`fulfil_hold` is currently callable with the public anon key so the demo's
+Mark-collected button works without a login. It only moves a hold from
+active to fulfilled and cannot read anything, but production would put it
+behind auth.
 ## Donor mobilisation
 
 Alerts fire on a blood centre's own stock falling below a per-group floor,
