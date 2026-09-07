@@ -117,8 +117,13 @@ reads happen through the service role in an edge function.
 Floors are set per group, higher for rarer ones. Those numbers are judgement,
 not evidence.
 
-Not yet built: any delivery channel. `donor_alerts` records who would be
-contacted. Nothing is sent.
+Registration is a public page at `/donate`. It writes through the anon key
+under the insert-only RLS policy, so the browser can create a donor and
+cannot read the register back. Consent is captured as a timestamp the policy
+requires; a row without it is rejected by the database, not by the form.
+
+Still not built: any delivery channel. `donor_alerts` records who would be
+contacted and when. Nothing is sent.
 ## Running it
 
 1. Run schema.sql, then seed.sql, in the Supabase SQL editor
