@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { PointerEvent as RPointerEvent } from "react";
 import { Link } from "react-router-dom";
+import Story from "./Story";
+import "../story.css";
 
 const Icon = ({ d }: { d: string }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -226,65 +228,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="section alt">
-        <div className="section-inner">
-          <span className="pill-tag">The problem</span>
-          <h2>Finding a bank is easy. Trusting the listing is not.</h2>
-          <p className="sub">Three things make an emergency blood request slow.</p>
-          <div className="grid-3 reveal">
-            <div className="card">
-              <div className="big-num">31 h</div>
-              <p className="t">Listings go stale</p>
-              <p className="b">The demo's opening listing was last updated 31 hours ago. The bank ran out the day before.</p>
-            </div>
-            <div className="card">
-              <div className="big-num">~6%</div>
-              <p className="t">Rh-negative is scarce</p>
-              <p className="b">Roughly 6 percent of people in India are Rh-negative, so most banks hold none of a given negative group.</p>
-            </div>
-            <div className="card">
-              <div className="big-num">1 of 8</div>
-              <p className="t">O− can only receive O−</p>
-              <p className="b">An O-negative patient has no compatible alternative. Widening the radius is the only fallback.</p>
-            </div>
-          </div>
-          <div className="callout reveal">
-            "The portal shows four units of O negative. The bank ran out yesterday. Somebody is about to drive across
-            the city for nothing."
-          </div>
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="section-inner">
-          <span className="pill-tag">How it works</span>
-          <h2>Four steps, one human decision</h2>
-          <p className="sub">The assistant proposes. A person decides.</p>
-          <div className="grid-4 reveal">
-            {[
-              { n: "01", i: I.search, t: "Search", b: "Blood group, units and hospital. Compatible stock within 80 km, exact matches first." },
-              { n: "02", i: I.phone, t: "Verify", b: "Each listing is checked. Stale ones fail, and you see why in the live log." },
-              { n: "03", i: I.mic, t: "Hear the bank", b: "Gnani Timbre speaks the AI disclosure. After consent, Gnani Prisma transcribes the bank's spoken reply." },
-              { n: "04", i: I.check, t: "Approve the hold", b: "Nothing is reserved until you approve. Holds last 30 minutes and cancel if the bank says no." },
-            ].map((p) => (
-              <div className="card phase" key={p.n}>
-                <span className="wm" aria-hidden="true">
-                  {p.n}
-                </span>
-                <div className="ico">
-                  <Icon d={p.i} />
-                </div>
-                <p className="t" style={{ fontSize: 15, fontWeight: 700 }}>
-                  {p.t}
-                </p>
-                <p className="b" style={{ fontSize: 12 }}>
-                  {p.b}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <Story />
 
       <section className="section alt">
         <div className="section-inner">

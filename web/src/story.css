@@ -1,0 +1,96 @@
+/* Why / How / What story sections on the home page. */
+
+.story { position: relative; overflow: hidden; }
+.story-head { display: grid; grid-template-columns: 1fr; gap: 8px; margin-bottom: 30px; align-items: end; }
+.story-word {
+  font-family: "Poppins", sans-serif; font-weight: 700; line-height: 0.85; letter-spacing: -0.05em;
+  font-size: clamp(72px, 15vw, 190px);
+  color: transparent; -webkit-text-stroke: 2px rgba(2, 71, 91, 0.16);
+  background: linear-gradient(120deg, rgba(0, 179, 142, 0.28), rgba(124, 92, 255, 0.22), rgba(252, 153, 22, 0.26));
+  -webkit-background-clip: text; background-clip: text;
+  user-select: none;
+}
+.how .story-word { background: linear-gradient(120deg, rgba(124, 92, 255, 0.3), rgba(91, 143, 196, 0.28), rgba(0, 179, 142, 0.26)); -webkit-background-clip: text; background-clip: text; }
+.what .story-word { background: linear-gradient(120deg, rgba(252, 153, 22, 0.32), rgba(255, 107, 107, 0.26), rgba(124, 92, 255, 0.22)); -webkit-background-clip: text; background-clip: text; }
+.story h2 { font-size: clamp(1.6rem, 3.4vw, 2.5rem); line-height: 1.12; color: #02475b; max-width: 760px; margin-top: 14px; }
+.story .sub { font-size: 1.05rem; max-width: 680px; margin-bottom: 0; }
+
+/* WHY: the chain of what happens today */
+.chain { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 22px; }
+.chain-step {
+  position: relative; background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 14px 16px;
+  border-left: 4px solid #d97706; transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.chain-step:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(2, 71, 91, 0.1); }
+.chain-step.bad { border-left-color: #dc2626; background: #fffafa; }
+.chain-step b { display: block; font-family: "Poppins", sans-serif; font-size: 15px; color: #2c3e50; }
+.chain-step span { font-size: 12.5px; color: #6b7280; }
+
+/* HOW: the flow */
+.flow { list-style: none; margin: 0 0 22px; padding: 0; display: grid; grid-template-columns: 1fr; gap: 14px; position: relative; }
+.flow-step {
+  position: relative; background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 20px 18px 18px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); transition: transform 0.25s cubic-bezier(0.2, 1.4, 0.4, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.flow-step:hover { transform: translateY(-8px); box-shadow: 0 18px 40px rgba(2, 71, 91, 0.14); }
+.flow-step b { display: block; font-family: "Poppins", sans-serif; font-size: 16px; margin: 12px 0 4px; color: #2c3e50; }
+.flow-step p { font-size: 12.5px; line-height: 1.65; color: #6b7280; margin: 0; }
+.flow-n { position: absolute; right: 14px; top: 10px; font-family: "Poppins", sans-serif; font-weight: 700; font-size: 34px; color: #eef0f2; }
+.flow-ico { width: 46px; height: 46px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: #fff; }
+.flow-ico svg { width: 22px; height: 22px; }
+.flow-step.c1 .flow-ico { background: linear-gradient(135deg, #00b38e, #02475b); }
+.flow-step.c2 .flow-ico { background: linear-gradient(135deg, #5b8fc4, #3f73a8); }
+.flow-step.c3 .flow-ico { background: linear-gradient(135deg, #fc9916, #d9730d); }
+.flow-step.c4 .flow-ico { background: linear-gradient(135deg, #7c5cff, #5b3fd6); }
+.flow-step.c5 .flow-ico { background: linear-gradient(135deg, #00b38e, #4a9d7e); }
+.flow-step.c1:hover { border-color: #00b38e; }
+.flow-step.c2:hover { border-color: #5b8fc4; }
+.flow-step.c3:hover { border-color: #fc9916; }
+.flow-step.c4:hover { border-color: #7c5cff; }
+.flow-step.c5:hover { border-color: #00b38e; }
+.principles .card { margin: 0; }
+.p-ico { width: 38px; height: 38px; border-radius: 12px; background: rgba(2, 71, 91, 0.08); color: #02475b; display: flex; align-items: center; justify-content: center; }
+.p-ico svg { width: 18px; height: 18px; }
+
+/* WHAT: comparison */
+.compare table { width: 100%; border-collapse: collapse; background: #fff; }
+.compare th, .compare td { padding: 14px 16px; text-align: left; vertical-align: top; font-size: 13.5px; border-bottom: 1px solid #eef0f2; }
+.compare th:nth-child(3), .compare td:nth-child(3) { background: rgba(0, 179, 142, 0.06); color: #1f5c4a; font-weight: 500; }
+.compare td:nth-child(2) { color: #6b7280; }
+.compare tbody tr { transition: background 0.2s ease; }
+.compare tbody tr:hover td:nth-child(3) { background: rgba(0, 179, 142, 0.13); }
+.mark { display: inline-flex; width: 20px; height: 20px; border-radius: 50%; align-items: center; justify-content: center; margin-right: 8px; vertical-align: -4px; }
+.mark svg { width: 12px; height: 12px; stroke-width: 3; }
+.mark.no { background: #fee2e2; color: #dc2626; }
+.mark.yes { background: #00b38e; color: #fff; }
+
+.honest { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 22px; }
+.honest-col { border-radius: 16px; padding: 20px 22px; border: 1px solid #e5e7eb; }
+.honest-col h3 { font-size: 15px; margin-bottom: 8px; }
+.honest-col ul { margin: 0; padding-left: 18px; font-size: 13.5px; color: #4b5563; }
+.honest-col li { margin: 4px 0; }
+.honest-col.real { background: linear-gradient(135deg, rgba(0, 179, 142, 0.1), rgba(91, 143, 196, 0.08)); border-color: rgba(0, 179, 142, 0.3); }
+.honest-col.real h3 { color: #1f5c4a; }
+.honest-col.sim { background: #fffbeb; border-color: #fde68a; }
+.honest-col.sim h3 { color: #92400e; }
+
+@media (min-width: 760px) {
+  .chain { grid-template-columns: repeat(4, 1fr); }
+  .chain-step:not(:last-child)::after {
+    content: "→"; position: absolute; right: -13px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-weight: 700; z-index: 1;
+  }
+  .honest { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 980px) {
+  .story-head { grid-template-columns: auto 1fr; gap: 28px; }
+  .flow { grid-template-columns: repeat(5, 1fr); }
+  .flow::before {
+    content: ""; position: absolute; left: 6%; right: 6%; top: 43px; height: 3px; border-radius: 3px; z-index: 0;
+    background: linear-gradient(90deg, #00b38e, #5b8fc4, #fc9916, #7c5cff, #00b38e); background-size: 200% 100%;
+    animation: flow-run 5s linear infinite; opacity: 0.55;
+  }
+  .flow-step { z-index: 1; }
+}
+@keyframes flow-run { to { background-position: 200% 0; } }
+@media (prefers-reduced-motion: reduce) { .flow::before { animation: none; } }
+.story { scroll-margin-top: 70px; }
