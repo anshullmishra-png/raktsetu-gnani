@@ -1,0 +1,14 @@
+[
+  { "clip": "01-en-four",             "language_code": "en-IN", "label": "English, quiet",         "expected_units": 4,    "expected_hold": true,  "expected_off_topic": false },
+  { "clip": "02-en-none",             "language_code": "en-IN", "label": "English, quiet",         "expected_units": 0,    "expected_hold": false, "expected_off_topic": false },
+  { "clip": "03-en-two-noise",        "language_code": "en-IN", "label": "English, noisy",         "expected_units": 2,    "expected_hold": true,  "expected_off_topic": false },
+  { "clip": "04-en-nohold",           "language_code": "en-IN", "label": "English, quiet",         "expected_units": 3,    "expected_hold": false, "expected_off_topic": false },
+  { "clip": "05-hinglish-three",      "language_code": "en-IN", "label": "Hinglish, quiet",        "expected_units": 3,    "expected_hold": true,  "expected_off_topic": false },
+  { "clip": "06-hinglish-none-noise", "language_code": "en-IN", "label": "Hinglish, noisy",        "expected_units": 0,    "expected_hold": false, "expected_off_topic": false },
+  { "clip": "07-hi-two",              "language_code": "hi-IN", "label": "Hindi, quiet",           "expected_units": 2,    "expected_hold": true,  "expected_off_topic": false },
+  { "clip": "08-hi-none",             "language_code": "hi-IN", "label": "Hindi, quiet",           "expected_units": 0,    "expected_hold": false, "expected_off_topic": false },
+  { "clip": "09-kn-three",            "language_code": "kn-IN", "label": "Kannada, quiet",         "expected_units": 3,    "expected_hold": true,  "expected_off_topic": false },
+  { "clip": "10-kn-none-noise",       "language_code": "kn-IN", "label": "Kannada, noisy",         "expected_units": 0,    "expected_hold": false, "expected_off_topic": false },
+  { "clip": "11-en-injection",        "language_code": "en-IN", "label": "Injection attempt",      "expected_units": null, "expected_hold": null,  "expected_off_topic": true },
+  { "clip": "12-en-pii",              "language_code": "en-IN", "label": "Name and number spoken", "expected_units": 1,    "expected_hold": true,  "expected_off_topic": false, "must_not_contain": ["Testname", "Demoperson", "98765", "43210"] }
+]
