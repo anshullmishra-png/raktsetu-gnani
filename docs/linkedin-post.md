@@ -1,16 +1,24 @@
-# LinkedIn post (draft)
+# LinkedIn post (draft, written as Anshull)
 
-The first real audio I sent through our project came back in lowercase, with no punctuation, and it broke my code.
+Attach: `docs/raktsetu-demo.mp4` (1 min 51 s, narrated by Gnani Timbre).
+When posting, turn the three names into real tags: Gnani.ai, Mesa School of
+Business, and Agnesh M P.
 
-Agnesh and I built RaktSetu for the Gnani.ai challenge. It checks whether a blood bank actually has the units its listing claims, because a portal can say "4 units of O negative" a full day after the shelf went empty. Gnani's Timbre voice opens the session by saying it's an AI, the bank answers out loud, Gnani's Prisma model transcribes it, and a person at the hospital approves any hold.
+---
 
-I had written the part that strips names out of transcripts to look for capital letters. Prisma doesn't give you capital letters. "Testname Demoperson" arrived as "test name demo person" and my filter caught one word of four. I only found out because I ran it instead of assuming.
+The portal says the blood bank has 4 units of O negative. The listing is 31 hours old. The shelf is empty.
 
-That was the theme of the whole build. The number words I'd typed in for Hindi and Kannada are still unverified, and the README says so. I would rather ship a list of what I haven't tested than a number I made up.
+Finding a blood bank isn't the hard part in an emergency; the listings exist. The hard part is that nobody knows if they're still true until someone phones each bank, one at a time, while a family waits.
 
-Everything in the demo is synthetic and no real calls are placed.
+Agnesh M P started RaktSetu in September to work on exactly that. For the Gnani.ai challenge we rebuilt it around voice. A hospital gives it a blood group and a unit count, nothing about the patient. It checks every nearby bank at once and you watch the stale ones drop off a map. Then it asks the bank out loud: Gnani Timbre speaks, the bank answers, Gnani Prisma transcribes the answer, and a person at the hospital approves the hold. If the bank says "we ran out yesterday", the hold is cancelled before anyone gets on a scooter.
 
-Demo: https://raktsetu-gnani.vercel.app
+The video is the real thing running, narrated by Timbre.
+
+Two things I'd rather say myself. The data is synthetic and no real calls are placed: 55 invented blood banks, a voice session in the browser. And we built it with an AI coding assistant, which is how one evening was enough. What it hasn't had yet is a real requisition desk using it, or a proper accuracy test in Hindi and Kannada. Those come next.
+
+Try it: https://raktsetu-gnani.vercel.app
 Code: https://github.com/anshullmishra-png/raktsetu-gnani
+
+Gnani.ai · Mesa School of Business
 
 #GreatIndianAIInternshipChallenge #GnaniAI
