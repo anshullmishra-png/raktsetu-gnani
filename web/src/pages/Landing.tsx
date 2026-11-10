@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from "react";
+import type { PointerEvent as RPointerEvent } from "react";
 import { Link } from "react-router-dom";
 
 const Icon = ({ d }: { d: string }) => (
@@ -16,7 +18,62 @@ const I = {
   drop: "M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z",
 };
 
+/** Counts up to a number once, when the page loads. */
+function CountUp({ to, suffix = "" }: { to: number; suffix?: string }) {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setN(to);
+      return;
+    }
+    const t0 = performance.now();
+    let raf = 0;
+    const tick = (t: number) => {
+      const k = Math.min(1, (t - t0) / 1100);
+      setN(Math.round(to * (1 - Math.pow(1 - k, 3))));
+      if (k < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [to]);
+  return (
+    <>
+      {n}
+      {suffix}
+    </>
+  );
+}
+
+const TICKER: [string, string][] = [
+  ["Prisma", "Gnani speech-to-text hears the bank"],
+  ["Timbre", "Gnani text-to-speech speaks the disclosure"],
+  ["55", "fictional blood banks across five districts"],
+  ["7", "guardrails, each with an automated test"],
+  ["0", "patient details collected"],
+  ["30 min", "hold window, approved by a person"],
+];
+
 export default function Landing() {
+  // The hero card plays the story in a loop: stale listing, the call, the next bank.
+  const [stage, setStage] = useState(0);
+  useEffect(() => {
+    const t = window.setInterval(() => setStage((s) => (s + 1) % 3), 2200);
+    return () => window.clearInterval(t);
+  }, []);
+  const card = useRef<HTMLDivElement>(null);
+  const tilt = (e: RPointerEvent<HTMLDivElement>) => {
+    const el = card.current;
+    if (!el || e.pointerType !== "mouse") return;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty("--ty", ((e.clientX - r.left) / r.width - 0.5) * 10 + "deg");
+    el.style.setProperty("--tx", (0.5 - (e.clientY - r.top) / r.height) * 8 + "deg");
+  };
+  const untilt = () => {
+    if (!card.current) return;
+    card.current.style.setProperty("--tx", "0deg");
+    card.current.style.setProperty("--ty", "0deg");
+  };
+
   return (
     <>
       <section className="hero">
@@ -42,25 +99,25 @@ export default function Landing() {
             </div>
             <div className="stats-row fade-up d4">
               <div>
-                <div className="stat-num">55</div>
+                <div className="stat-num"><CountUp to={55} /></div>
                 <div className="stat-label">demo blood banks</div>
               </div>
               <div>
-                <div className="stat-num">80 km</div>
+                <div className="stat-num"><CountUp to={80} suffix=" km" /></div>
                 <div className="stat-label">search radius</div>
               </div>
               <div>
-                <div className="stat-num">30 min</div>
+                <div className="stat-num"><CountUp to={30} suffix=" min" /></div>
                 <div className="stat-label">hold window</div>
               </div>
             </div>
           </div>
 
-          <div className="hero-card fade-up d2" aria-label="Example of a stale listing">
+          <div className="hero-card fade-up d2" aria-label="Example of a stale listing" ref={card} onPointerMove={tilt} onPointerLeave={untilt}>
             <span className="pill-tag">
               <Icon d={I.clock} /> What the portal shows
             </span>
-            <div className="listing" style={{ marginTop: 12 }}>
+            <div className={`listing s0 ${stage === 0 ? "on" : ""}`} style={{ marginTop: 12 }}>
               <div className="row">
                 <b>Karuna Blood Centre, Jayanagar</b>
                 <span>O−</span>
@@ -72,15 +129,23 @@ export default function Landing() {
                 </span>
               </div>
             </div>
-            <div className="listing">
+            <div className={`listing s1 ${stage === 1 ? "on" : ""}`}>
               <div className="row">
                 <span>
                   <span className="dot r" />
                   Heard on the call: "we ran out yesterday"
+                  {stage === 1 && (
+                    <span className="wave" aria-hidden="true">
+                      <i />
+                      <i />
+                      <i />
+                      <i />
+                    </span>
+                  )}
                 </span>
               </div>
             </div>
-            <div className="listing" style={{ marginBottom: 0 }}>
+            <div className={`listing s2 ${stage === 2 ? "on" : ""}`} style={{ marginBottom: 0 }}>
               <div className="row">
                 <span>
                   <span className="dot g" />
@@ -106,12 +171,42 @@ export default function Landing() {
         </div>
       </section>
 
+      <div className="tiles">
+        <Link to="/hospital" className="tile t1 fade-up d1">
+          <span className="tico"><Icon d={I.search} /></span>
+          <span>Find blood<small>Search 55 demo banks</small></span>
+        </Link>
+        <Link to="/hospital" className="tile t2 fade-up d2">
+          <span className="tico"><Icon d={I.mic} /></span>
+          <span>Hear the bank<small>Gnani Prisma + Timbre</small></span>
+        </Link>
+        <Link to="/donate" className="tile t3 fade-up d3">
+          <span className="tico"><Icon d={I.drop} /></span>
+          <span>Donate<small>See where blood is short</small></span>
+        </Link>
+        <Link to="/admin" className="tile t4 fade-up d4">
+          <span className="tico"><Icon d={I.shield} /></span>
+          <span>Oversee<small>Kill switch and audit log</small></span>
+        </Link>
+      </div>
+
+      <div className="marquee" aria-hidden="true">
+        <div>
+          {[...TICKER, ...TICKER].map(([a, b], i) => (
+            <span key={i}>
+              <b>{a}</b>
+              {b}
+            </span>
+          ))}
+        </div>
+      </div>
+
       <section className="section">
         <div className="section-inner">
           <span className="pill-tag">Who are you?</span>
           <h2>Pick where to start</h2>
           <p className="sub">No login needed for this demo.</p>
-          <div className="role-grid">
+          <div className="role-grid reveal">
             <Link to="/hospital" className="role-card">
               <h2>Hospital</h2>
               <p>Find blood for a request, hear back from blood banks, and approve a hold.</p>
@@ -136,7 +231,7 @@ export default function Landing() {
           <span className="pill-tag">The problem</span>
           <h2>Finding a bank is easy. Trusting the listing is not.</h2>
           <p className="sub">Three things make an emergency blood request slow.</p>
-          <div className="grid-3">
+          <div className="grid-3 reveal">
             <div className="card">
               <div className="big-num">31 h</div>
               <p className="t">Listings go stale</p>
@@ -153,7 +248,7 @@ export default function Landing() {
               <p className="b">An O-negative patient has no compatible alternative. Widening the radius is the only fallback.</p>
             </div>
           </div>
-          <div className="callout">
+          <div className="callout reveal">
             "The portal shows four units of O negative. The bank ran out yesterday. Somebody is about to drive across
             the city for nothing."
           </div>
@@ -165,7 +260,7 @@ export default function Landing() {
           <span className="pill-tag">How it works</span>
           <h2>Four steps, one human decision</h2>
           <p className="sub">The assistant proposes. A person decides.</p>
-          <div className="grid-4">
+          <div className="grid-4 reveal">
             {[
               { n: "01", i: I.search, t: "Search", b: "Blood group, units and hospital. Compatible stock within 80 km, exact matches first." },
               { n: "02", i: I.phone, t: "Verify", b: "Each listing is checked. Stale ones fail, and you see why in the live log." },
@@ -198,7 +293,7 @@ export default function Landing() {
           </span>
           <h2>What the system will not do</h2>
           <p className="sub">Each rule is enforced in code or in the database, and has an automated test.</p>
-          <div className="table-wrap trust">
+          <div className="table-wrap trust reveal">
             <table>
               <thead>
                 <tr>
@@ -228,6 +323,13 @@ export default function Landing() {
             </table>
           </div>
         </div>
+      </section>
+      <section className="cta-band">
+        <h2>See a stale listing get caught</h2>
+        <p>Run a request, watch the map light up, and hear the bank's answer.</p>
+        <Link to="/hospital" className="btn btn-accent">
+          Start a request
+        </Link>
       </section>
     </>
   );
