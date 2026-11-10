@@ -273,3 +273,19 @@ export const adminApi = {
   evals: (p: string) => adminCall<{ rows: EvalRow[] }>(p, { action: "evals" }),
   pledges: (p: string) => adminCall<{ rows: PledgeRow[] }>(p, { action: "pledges" }),
 };
+
+/* ---------- speak (Gnani Timbre) ---------- */
+
+/** Fetches speech from the server (Gnani Timbre). Returns an object URL for an <audio> element. */
+export async function speak(kind: "disclosure" | "reply", request_id: string): Promise<string> {
+  const res = await fetch("/api/speak", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ kind, request_id }),
+  });
+  if (!res.ok) {
+    const d = (await res.json().catch(() => ({}))) as { error?: string; message?: string };
+    throw new ApiError(res.status, d.error ?? "", friendly(res.status, d.error ?? "", d.message));
+  }
+  return URL.createObjectURL(await res.blob());
+}

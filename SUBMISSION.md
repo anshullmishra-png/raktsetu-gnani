@@ -32,7 +32,8 @@ the units are returned.
 
 | Model | Role |
 |---|---|
-| **Gnani Prisma v2.5** (`prisma-v2.5`, speech-to-text) | Transcribes the blood bank's spoken reply. Called server-side through the REST API at `api.vachana.ai/stt/v3` with language codes `en-IN`, `hi-IN` and `kn-IN`. This is the only Gnani model used. |
+| **Gnani Prisma v2.5** (`prisma-v2.5`, speech-to-text) | Transcribes the blood bank's spoken reply. Called server-side through the REST API at `api.vachana.ai/stt/v3` with language codes `en-IN`, `hi-IN` and `kn-IN`. |
+| **Gnani Timbre v2.5** (`timbre-v2.5`, text-to-speech) | Speaks the AI disclosure at the start of each voice session and speaks RaktSetu's reply back after the bank answers. Called server-side at `api.vachana.ai/api/v1/tts/inference`. |
 | Gemini (`gemini-3.1-flash-lite`) | Runs the dispatch tool loop and extracts structured fields from the Prisma transcript. Not a Gnani model. |
 
 ## Guardrails
@@ -45,7 +46,7 @@ test. Details and test results are in the README.
 
 ## What is real and what is not
 
-Real: Gnani Prisma transcription, the Gemini agent, the database rules, the
+Real: Gnani Prisma transcription, Gnani Timbre speech, the Gemini agent, the database rules, the
 deployed site. Simulated: blood bank inventory, the agent's own bank calls,
 and the hold itself. All data is synthetic. No real call is placed.
 

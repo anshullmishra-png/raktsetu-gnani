@@ -28,10 +28,11 @@ patient data is collected or stored.
   quality, and **proposes** holds. It can split a request across banks.
 - The hospital user approves or rejects each proposal. Only approval reserves
   units, for 30 minutes.
-- For any bank, the user can open a voice session: an AI disclosure is shown
-  and read aloud, consent is ticked, and the bank's spoken reply is recorded
-  or uploaded. Gnani Prisma transcribes it. If the bank says it cannot
-  supply, the hold is cancelled and the units go back to stock.
+- For any bank, the user can open a voice session: a Gnani Timbre voice
+  speaks the AI disclosure, consent is ticked, and the bank's spoken reply is
+  recorded or uploaded. Gnani Prisma transcribes it, and Timbre speaks
+  RaktSetu's answer back. If the bank says it cannot supply, the hold is
+  cancelled and the units go back to stock.
 - Holds end one of three ways: collected, cancelled, or expired.
 - Donors can register (first name, blood group, locality, consent) and see
   which blood banks are below their floor for which group.
@@ -42,14 +43,18 @@ patient data is collected or stored.
 |---|---|---|
 | **Gnani Prisma** (speech-to-text) | **Prisma v2.5** (`prisma-v2.5`) | Transcribes the blood bank's spoken reply in each voice session. Called server-side over REST (`POST https://api.vachana.ai/stt/v3`) with `format=transcribe`, so spoken numbers come back as digits. |
 
-That is the only Gnani model in the pipeline. No Timbre, no Evon, no Gnani
-agent. Languages used: English (`en-IN`), Hindi (`hi-IN`) and Kannada
+| **Gnani Timbre** (text-to-speech) | **Timbre v2.5** (`timbre-v2.5`, voice "Kaveri", `en-IN`) | Speaks the AI disclosure at the start of a voice session, and speaks RaktSetu's reply after the bank's answer has been processed. Called server-side (`POST https://api.vachana.ai/api/v1/tts/inference`). The browser cannot send it text: the server composes the words from the database. |
+
+Those are the two Gnani models in the pipeline: Prisma listens, Timbre
+speaks. No Evon and no Gnani agent, so there is no telephony: the voice
+session happens in the browser, not over a phone line. Prisma languages used: English (`en-IN`), Hindi (`hi-IN`) and Kannada
 (`kn-IN`). On Prisma v2.5 the only code-mixed setting is `en-IN`, which accepts
 English-Hindi mixed speech and returns Latin script, so Hinglish clips are sent
 as `en-IN`. Notes from the docs are in [`docs/gnani-notes.md`](docs/gnani-notes.md).
 
-The disclosure script is read aloud by the browser's built-in speech
-synthesis, and the page says so. It is not a Gnani voice.
+Timbre speaks in English only here; the Hindi and Kannada sides are
+speech-to-text only. If Timbre is unreachable, the page falls back to the
+browser's built-in voice and says so on screen.
 
 Gemini (`gemini-3.1-flash-lite` by default) does two things: it runs the
 dispatch tool loop, and it turns a Prisma transcript into four fields
@@ -66,6 +71,7 @@ Vercel serverless functions (web/api)
    dispatch      Gemini tool loop: search_stock, call_banks, rank_banks, propose_hold
    voice-start   records consent, opens a voice session with a demo bank
    voice-reply   audio -> Gnani Prisma -> redaction -> Gemini extraction -> validation
+   speak         Gnani Timbre: speaks the disclosure and RaktSetu's reply
    approve-hold  a person approves; the only caller of place_hold_atomic
    admin         passcode-gated: kill switch, audit log, transcripts, eval results
    public        everything the public pages do, run as a restricted database role
@@ -116,7 +122,7 @@ against the deployed site and database).
    proposal (`NOT NULL UNIQUE` foreign key plus a trigger), and
    `place_hold_atomic` refuses any approver that is not `hospital` or `admin`.
 5. **Admin kill switch.** `settings.calls_enabled`. `dispatch`, `voice-start`,
-   `voice-reply` and `approve-hold` check it first and return HTTP 423 when it
+   `voice-reply`, `speak` and `approve-hold` check it first and return HTTP 423 when it
    is off; the voice-session trigger and `place_hold_atomic` check it again
    in the database. The `admin` function is the one exception, because it has
    to stay reachable to turn calls back on.
@@ -180,7 +186,7 @@ database on 10 Nov 2026):
 |---|---|
 | `tests/logic.test.ts` (offline: compatibility table, redaction, injection, no hold-placing tool) | 16 of 16 passed |
 | `tests/live.test.ts` (deployed API plus database: all seven guardrails, hold lifecycle, donor privacy) | 19 of 19 passed |
-| `tests/smoke.mjs` (deployed site, real Gemini dispatch, real Prisma audio, approve, cancel, collect, pledge) | passed |
+| `tests/smoke.mjs` (deployed site, real Gemini dispatch, real Prisma audio, real Timbre speech, approve, cancel, collect, pledge) | passed |
 
 The live suite's first run was 16 of 19; the three failures were mistakes in
 the test script, not in the system. Two later runs each lost one test to a

@@ -90,7 +90,7 @@ export default function Landing() {
             </div>
             <div className="benefits">
               <div className="benefit">
-                <Icon d={I.mic} /> Transcribed by Gnani Prisma
+                <Icon d={I.mic} /> Heard by Gnani Prisma, spoken by Gnani Timbre
               </div>
               <div className="benefit">
                 <Icon d={I.user} /> A person approves every hold
@@ -169,7 +169,7 @@ export default function Landing() {
             {[
               { n: "01", i: I.search, t: "Search", b: "Blood group, units and hospital. Compatible stock within 80 km, exact matches first." },
               { n: "02", i: I.phone, t: "Verify", b: "Each listing is checked. Stale ones fail, and you see why in the live log." },
-              { n: "03", i: I.mic, t: "Hear the bank", b: "After an AI disclosure and consent, the bank's spoken reply is transcribed by Gnani Prisma." },
+              { n: "03", i: I.mic, t: "Hear the bank", b: "Gnani Timbre speaks the AI disclosure. After consent, Gnani Prisma transcribes the bank's spoken reply." },
               { n: "04", i: I.check, t: "Approve the hold", b: "Nothing is reserved until you approve. Holds last 30 minutes and cancel if the bank says no." },
             ].map((p) => (
               <div className="card phase" key={p.n}>

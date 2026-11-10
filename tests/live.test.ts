@@ -307,6 +307,8 @@ test("hold lifecycle: fulfil works once; the expiry sweep only touches active ho
       assert.equal(h.rows[0].r.ok, true);
       return { hold: h.rows[0].r.hold_id as string, bank: p.rows[0].bank_id as string };
     };
+    // Clear holds left over from earlier demo runs so the count below is ours alone.
+    await db.query("select release_expired_holds()");
     const a = await mk(), b = await mk();
     const units = async (bank: string) => (await db.query("select units from stock where bank_id = $1 and blood_group = 'O+'", [bank])).rows[0].units;
     const total = async () => (a.bank === b.bank ? await units(a.bank) : (await units(a.bank)) + (await units(b.bank)));
@@ -331,6 +333,7 @@ test("guardrail 5: kill switch off makes every acting function refuse; the chang
       ["dispatch", { action: "dispatch", hospital_id: crypto.randomUUID(), blood_group: "O+", units_needed: 1 }],
       ["voice-start", { request_id: requestId, bank_id: bankId, blood_group: group, language_code: "en-IN", consent: true }],
       ["voice-reply", { voice_call_id: crypto.randomUUID() }],
+      ["speak", { kind: "disclosure", request_id: requestId }],
       ["approve-hold", { proposal_id: crypto.randomUUID(), decision: "approve", approver_role: "hospital" }],
     ] as const) {
       const r = await api(name, body);

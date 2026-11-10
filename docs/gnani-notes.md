@@ -83,3 +83,24 @@ What this showed that the docs did not spell out:
   "four units" stayed a word. The unit parser therefore needs number words as
   well as digits, even with ITN on.
 - "first come, first served" came back as "1st come 1st served".
+
+## Timbre text-to-speech (added 10 Nov 2026)
+
+From https://docs.gnani.ai/api/TTS/ and one real call.
+
+- `POST https://api.vachana.ai/api/v1/tts/inference`, JSON body, same
+  `X-API-Key-ID` header as Prisma. The same Voice API key works for both.
+- Fields used: `text`, `model=timbre-v2.5`, `voice=Kaveri` (an English v2.5
+  voice), `language=en-IN`, `speed=1.0`, `audio_config` with
+  `container=mp3`, `sample_rate=24000`, `bitrate=64k`.
+- Response is raw binary audio (`audio/mpeg`), not JSON.
+- Docs ask for numbers and symbols to be spelled out, so the server turns
+  "2 units of O+" into "two units of O positive" before sending.
+- No maximum text length is documented; over-long text returns a 500. The
+  server caps text at 600 characters.
+- Timbre v3.0 also exists (13 voices, all ten languages). Not used here.
+- Real call: the 340-character disclosure script returned 145,536 bytes of
+  MP3 in about 4 seconds.
+- Placing phone calls is a separate product (Agent Builder, `api.inya.ai`).
+  The Voice API key is rejected there (`401 Invalid API key`), so RaktSetu
+  has no telephony.

@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useRef, useState } from "react";
-import { LanguageCode, VoiceReplyResult, voiceReply, voiceStart } from "../api";
+import { LanguageCode, VoiceReplyResult, speak, voiceReply, voiceStart } from "../api";
 import { RECORD_LIMIT_SECONDS, Recording, startRecording, toWav16kMono } from "../audio";
 import { BloodBank, errText } from "../types";
 
@@ -46,6 +46,9 @@ export default function VoicePanel({ requestId, hospitalName, bloodGroup, banks,
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
   const [speaking, setSpeaking] = useState(false);
+  const [voiceSource, setVoiceSource] = useState<"gnani" | "browser" | null>(null);
+  const [loadingVoice, setLoadingVoice] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const recRef = useRef<Recording | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -99,19 +102,53 @@ export default function VoicePanel({ requestId, hospitalName, bloodGroup, banks,
     return () => window.clearInterval(t);
   }, [recording]);
 
-  function readAloud() {
+  function browserSpeak(text: string) {
     if (!canSpeak) return;
     window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(script);
+    const u = new SpeechSynthesisUtterance(text);
     u.lang = "en-IN";
     u.rate = 0.95;
     u.onend = () => setSpeaking(false);
     u.onerror = () => setSpeaking(false);
+    setVoiceSource("browser");
     setSpeaking(true);
     window.speechSynthesis.speak(u);
   }
 
+  // Speech comes from Gnani Timbre. If that fails, fall back to the browser's
+  // own voice and say so on screen.
+  async function play(kind: "disclosure" | "reply", fallbackText: string) {
+    stopReading();
+    setLoadingVoice(true);
+    try {
+      const url = await speak(kind, requestId);
+      if (!aliveRef.current) return;
+      const a = new Audio(url);
+      audioRef.current = a;
+      a.onended = () => {
+        setSpeaking(false);
+        URL.revokeObjectURL(url);
+      };
+      a.onerror = () => setSpeaking(false);
+      setVoiceSource("gnani");
+      setSpeaking(true);
+      await a.play();
+    } catch {
+      if (aliveRef.current) browserSpeak(fallbackText);
+    } finally {
+      if (aliveRef.current) setLoadingVoice(false);
+    }
+  }
+
+  function readAloud() {
+    void play("disclosure", script);
+  }
+
   function stopReading() {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
     if (canSpeak) window.speechSynthesis.cancel();
     setSpeaking(false);
   }
@@ -160,6 +197,9 @@ export default function VoicePanel({ requestId, hospitalName, bloodGroup, banks,
       const res = await voiceReply(voiceCallId, wav);
       if (!aliveRef.current) return;
       setResult(res);
+      // Speak the outcome back, like the other side of a call. Browsers may
+      // block audio that was not started by a click; the button below still works.
+      if (res.outcome !== "no_speech" && res.message) void play("reply", res.message);
       if (res.outcome !== "no_speech") {
         // One consented session per reply: ask again before recording more.
         setConsent(false);
@@ -256,14 +296,14 @@ export default function VoicePanel({ requestId, hospitalName, bloodGroup, banks,
             Stop reading
           </button>
         ) : (
-          <button type="button" className="btn btn-secondary" onClick={readAloud} disabled={!canSpeak}>
-            Read aloud
+          <button type="button" className="btn btn-secondary" onClick={readAloud} disabled={loadingVoice}>
+            {loadingVoice ? "Preparing voice…" : "Play disclosure"}
           </button>
         )}
         <span className="muted small">
-          {canSpeak
-            ? "Read by your browser's built-in voice (not Gnani)."
-            : "Your browser has no built-in voice, so please read the script out yourself."}
+          {voiceSource === "browser"
+            ? "Gnani Timbre was unavailable, so this was read by your browser's built-in voice."
+            : "Spoken by Gnani Timbre (text-to-speech)."}
         </span>
       </div>
 
@@ -365,6 +405,19 @@ export default function VoicePanel({ requestId, hospitalName, bloodGroup, banks,
             <span className="chip">{OUTCOME_LABEL[result.outcome] ?? result.outcome}</span>
           </div>
           {result.message && <p style={{ marginTop: 10 }}>{result.message}</p>}
+          {result.message && result.outcome !== "no_speech" && (
+            <div className="btn-row">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                disabled={loadingVoice || speaking}
+                onClick={() => void play("reply", result.message)}
+              >
+                Hear RaktSetu's reply
+              </button>
+              <span className="muted small">Spoken by Gnani Timbre.</span>
+            </div>
+          )}
           {result.outcome !== "no_speech" && (
             <p className="muted small">To record another reply, tick the consent box again.</p>
           )}

@@ -2,6 +2,7 @@
   "functions": {
     "api/dispatch.ts": { "maxDuration": 120 },
     "api/voice-reply.ts": { "maxDuration": 60 },
+    "api/speak.ts": { "maxDuration": 30 },
     "api/*.ts": { "maxDuration": 30 }
   },
   "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }]

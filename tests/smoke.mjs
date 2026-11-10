@@ -17,6 +17,13 @@ const clip = async (voiceCallId, file) => {
   const res = await fetch(`${BASE}/api/voice-reply`, { method: "POST", body: form });
   return { status: res.status, data: await res.json().catch(() => null) };
 };
+// Retry on transport failures only (connection resets), never on an HTTP answer.
+const realFetch = globalThis.fetch;
+globalThis.fetch = async (...a) => {
+  for (let i = 0; ; i++) {
+    try { return await realFetch(...a); } catch (e) { if (i >= 3) throw e; await new Promise((r) => setTimeout(r, 1500)); }
+  }
+};
 const step = (s) => console.log(`\n== ${s}`);
 
 step("pages load");
@@ -66,6 +73,16 @@ assert.equal(r.data.extraction.units_available, 4);
 let prop = await pendingAtBank();
 assert.ok(prop, "a pending proposal exists at the bank");
 assert.equal((await api("public", { op: "request_state", request_id: requestId })).data.holds.filter((h) => h.bank_id === bank.id).length, 0);
+
+step("Gnani Timbre speaks the disclosure and the reply");
+for (const kind of ["disclosure", "reply"]) {
+  const sp = await fetch(`${BASE}/api/speak`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind, request_id: requestId }) });
+  const bytes = (await sp.arrayBuffer()).byteLength;
+  console.log(kind, sp.status, sp.headers.get("content-type"), sp.headers.get("x-gnani-model"), bytes, "bytes");
+  assert.equal(sp.status, 200); assert.equal(sp.headers.get("content-type"), "audio/mpeg"); assert.ok(bytes > 5000);
+}
+const arbitrary = await api("speak", { kind: "say", request_id: requestId, text: "anything" });
+assert.equal(arbitrary.status, 400, "speak cannot be given arbitrary text");
 
 step("human approval -> hold");
 const ap = await api("approve-hold", { proposal_id: prop.id, decision: "approve", approver_role: "hospital" });
