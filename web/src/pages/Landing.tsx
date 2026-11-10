@@ -82,22 +82,22 @@ export default function Landing() {
         <div className="hero-grid">
           <div>
             <span className="pill-tag fade-up">
-              <Icon d={I.drop} /> Blood dispatch assistant · Bengaluru
+              <Icon d={I.drop} /> For hospital blood requisition desks
             </span>
             <h1 className="fade-up d1">
               The portal says 4 units. <em>The shelf says zero.</em>
             </h1>
             <p className="lead fade-up d2">
-              RaktSetu checks stale blood bank listings before anyone travels. It finds compatible stock, hears the
-              bank's answer in their own words, and proposes a hold that a person at the hospital approves.
+              RaktSetu verifies blood bank stock before anyone travels. It checks every nearby listing at once,
+              hears the bank's answer by voice, and lines up a hold for a person to approve.
             </p>
             <div className="hero-cta fade-up d3">
               <Link to="/hospital" className="btn btn-primary">
                 Find blood
               </Link>
-              <Link to="/donate" className="btn btn-secondary">
-                Register as a donor
-              </Link>
+              <a href="#product" className="btn btn-secondary">
+                See how it works
+              </a>
             </div>
             <div className="stats-row fade-up d4">
               <div>
@@ -191,42 +191,6 @@ export default function Landing() {
           <span>Oversee<small>Kill switch and audit log</small></span>
         </Link>
       </div>
-
-      <div className="marquee" aria-hidden="true">
-        <div>
-          {[...TICKER, ...TICKER].map(([a, b], i) => (
-            <span key={i}>
-              <b>{a}</b>
-              {b}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <section className="section">
-        <div className="section-inner">
-          <span className="pill-tag">Who are you?</span>
-          <h2>Pick where to start</h2>
-          <p className="sub">No login needed for this demo.</p>
-          <div className="role-grid reveal">
-            <Link to="/hospital" className="role-card">
-              <h2>Hospital</h2>
-              <p>Find blood for a request, hear back from blood banks, and approve a hold.</p>
-              <span className="go">I need blood →</span>
-            </Link>
-            <Link to="/donate" className="role-card">
-              <h2>Donor</h2>
-              <p>Register as a donor and see where blood is needed near you.</p>
-              <span className="go">I want to donate →</span>
-            </Link>
-            <Link to="/admin" className="role-card">
-              <h2>Admin</h2>
-              <p>Pause or resume calls, review the audit log, transcripts and pledges.</p>
-              <span className="go">I look after the service →</span>
-            </Link>
-          </div>
-        </div>
-      </section>
 
       <Story />
 

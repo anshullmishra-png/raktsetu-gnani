@@ -74,13 +74,6 @@ export default function App() {
           RaktSetu
         </Link>
         <nav className="nav" aria-label="Main">
-          {wide && (
-            <>
-              <a href="#why">Why</a>
-              <a href="#how">How</a>
-              <a href="#what">What</a>
-            </>
-          )}
           <NavLink to="/hospital">Hospital</NavLink>
           <NavLink to="/donate">Donor</NavLink>
           <NavLink to="/admin">Admin</NavLink>

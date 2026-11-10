@@ -94,3 +94,25 @@
 @keyframes flow-run { to { background-position: 200% 0; } }
 @media (prefers-reduced-motion: reduce) { .flow::before { animation: none; } }
 .story { scroll-margin-top: 70px; }
+
+/* single-column heads (no oversized labels) */
+.story-head { grid-template-columns: 1fr !important; margin-bottom: 26px; }
+.tiles { margin-bottom: 8px; }
+
+.road { display: grid; gap: 10px; }
+.road-row {
+  display: grid; grid-template-columns: 1fr; gap: 4px 20px; align-items: start;
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 16px 18px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.road-row:hover { transform: translateX(4px); box-shadow: 0 8px 22px rgba(2, 71, 91, 0.08); }
+.road-row.now { border-left: 4px solid #00b38e; background: linear-gradient(90deg, rgba(0, 179, 142, 0.08), #fff 60%); }
+.road-when { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #6b7280; padding-top: 3px; }
+.road-row.now .road-when { color: #00916f; }
+.road-row b { font-family: "Poppins", sans-serif; font-size: 15px; color: #2c3e50; }
+.road-row p { margin: 0; font-size: 13px; color: #6b7280; line-height: 1.65; }
+.team { margin: 22px 0 0; font-size: 13.5px; color: #6b7280; }
+.team b { color: #2c3e50; }
+@media (min-width: 760px) {
+  .road-row { grid-template-columns: 90px 260px 1fr; }
+}

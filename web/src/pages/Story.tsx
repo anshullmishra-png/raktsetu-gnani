@@ -43,11 +43,8 @@ export default function Story() {
       <section className="section story why" id="why">
         <div className="section-inner">
           <div className="story-head">
-            <span className="story-word" aria-hidden="true">
-              WHY
-            </span>
             <div>
-              <span className="pill-tag">Why this exists</span>
+              <span className="pill-tag">The problem</span>
               <h2>The information exists. It just isn't true by the time you need it.</h2>
               <p className="sub">
                 India already has a national portal that lists blood bank stock. Finding a bank is not the hard part.
@@ -97,18 +94,15 @@ export default function Story() {
       </section>
 
       {/* ───────── HOW ───────── */}
-      <section className="section alt story how" id="how">
+      <section className="section alt story how" id="product">
         <div className="section-inner">
           <div className="story-head">
-            <span className="story-word" aria-hidden="true">
-              HOW
-            </span>
             <div>
-              <span className="pill-tag">How it works</span>
+              <span className="pill-tag">The product</span>
               <h2>Check every listing before anyone leaves the building.</h2>
               <p className="sub">
-                RaktSetu does the phoning-around step in one pass, then hands the decision to a person. Five stages,
-                one human decision.
+                RaktSetu does the phoning-around step in one pass, then hands the decision to a person. It is built for
+                the requisition desk of a hospital, where one person is making those calls today.
               </p>
             </div>
           </div>
@@ -156,11 +150,8 @@ export default function Story() {
       <section className="section story what" id="what">
         <div className="section-inner">
           <div className="story-head">
-            <span className="story-word" aria-hidden="true">
-              WHAT
-            </span>
             <div>
-              <span className="pill-tag">What you get</span>
+              <span className="pill-tag">The difference</span>
               <h2>An answer you can act on, and a record of how you got it.</h2>
               <p className="sub">The same request, handled the usual way and handled here.</p>
             </div>
@@ -219,6 +210,58 @@ export default function Story() {
               </ul>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="section alt story" id="next">
+        <div className="section-inner">
+          <div className="story-head">
+            <div>
+              <span className="pill-tag">Where this goes</span>
+              <h2>What is built, and what it takes to make it real.</h2>
+              <p className="sub">
+                This is a working demo, not a deployed service. The gap between the two is specific, so here it is.
+              </p>
+            </div>
+          </div>
+          <div className="road">
+            <div className="road-row now">
+              <span className="road-when">Built</span>
+              <b>The checking loop, end to end</b>
+              <p>
+                Compatibility-aware search, simulated verification, a real voice session (Gnani Timbre and Prisma),
+                human-approved holds with expiry and cancellation, seven tested guardrails, an audit log.
+              </p>
+            </div>
+            <div className="road-row">
+              <span className="road-when">Next</span>
+              <b>Measured accuracy in the languages that matter</b>
+              <p>
+                Recorded evaluations in Hindi, Kannada, Hinglish and noisy rooms. Today only machine-voice English
+                clips have been measured.
+              </p>
+            </div>
+            <div className="road-row">
+              <span className="road-when">Then</span>
+              <b>Real calls, to banks that have agreed to take them</b>
+              <p>
+                Telephony through an agent stack, limited to consenting banks. A hold only means something once the
+                bank itself confirms it.
+              </p>
+            </div>
+            <div className="road-row">
+              <span className="road-when">Later</span>
+              <b>Stock from the banks, not from a listing</b>
+              <p>
+                The root cause is stale inventory. Every verified call is a fresh data point; fed back, it makes the
+                next search better. Sign-in and roles come with any real deployment.
+              </p>
+            </div>
+          </div>
+          <p className="team">
+            Built by <b>Anshull Mishra</b> and <b>Agnesh M P</b> for the Gnani.ai Great Indian AI Internship Challenge
+            2026.
+          </p>
         </div>
       </section>
     </>
