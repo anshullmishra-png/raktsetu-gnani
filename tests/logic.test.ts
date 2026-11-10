@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
   COMPAT, decideVoiceAction, findNumbers, looksLikeInjection, MAX_TURNS, parseUnits,
-  redactPII, saysNone, turnLimitMessage, validateExtraction, wavDurationSeconds,
+  redactPII, saysNone, spokenGroups, turnLimitMessage, validateExtraction, wavDurationSeconds,
 } from "../web/api/_lib/logic.ts";
 
 // Independently written expected table: recipient -> donors, from ABO/Rh rules
@@ -83,6 +83,17 @@ test("a number the speaker never said is not trusted", () => {
   assert.equal(ex.needs_review, true);
   assert.equal(decideVoiceAction(ex), "none");
 });
+test("a reply about a different blood group is not acted on", () => {
+  assert.deepEqual(spokenGroups("yes we have four units of o negative and two of ab positive"), ["O-", "AB+"]);
+  assert.deepEqual(spokenGroups("we have a lot of stock"), []);
+  const t = "yes we have 4 units of o negative we can hold them";
+  const model = { units_available: 4, will_hold: true, collection_hours: null, off_topic: false };
+  const wrong = validateExtraction(model, t, "O+");
+  assert.equal(wrong.needs_review, true);
+  assert.equal(decideVoiceAction(wrong), "none");
+  assert.equal(decideVoiceAction(validateExtraction(model, t, "O-")), "propose");
+});
+
 test("valid replies map to propose / cancel, never to a hold", () => {
   const yes = validateExtraction({ units_available: 2, will_hold: true, collection_hours: "till 8 pm", off_topic: false }, "we have 2 units and will hold them till 8 pm");
   assert.equal(decideVoiceAction(yes), "propose");

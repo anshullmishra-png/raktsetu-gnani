@@ -334,10 +334,27 @@ async function runAgent(req: any) {
 
   const reqRow = await one<{ id: string }>(
     `insert into requests (id, hospital, lat, lng, blood_group, units_needed)
-     values (coalesce($1::uuid, gen_random_uuid()), $2, $3, $4, $5, $6) returning id`,
+     values (coalesce($1::uuid, gen_random_uuid()), $2, $3, $4, $5, $6)
+     on conflict (id) do nothing returning id`,
     [req.request_id ?? null, hosp.name, hosp.lat, hosp.lng, req.blood_group, unitsNeeded]);
 
-  const requestId = reqRow!.id;
+  // Browsers can re-send a long POST. A repeat of the same request_id must
+  // not start a second agent: wait for the first run and report its result.
+  if (!reqRow) {
+    const id: string = req.request_id;
+    let status = "open";
+    for (let i = 0; i < 55 && status === "open"; i++) {
+      status = (await one<{ status: string }>("select status from requests where id = $1", [id]))?.status ?? "open";
+      if (status === "open") await sleep(2000);
+    }
+    const last = await one<{ message: string }>(
+      "select message from call_log where request_id = $1 and event = 'system' order by id desc limit 1", [id]);
+    const sum = await one<{ n: number }>(
+      "select coalesce(sum(units), 0)::int as n from hold_proposals where request_id = $1 and source = 'agent'", [id]);
+    return { request_id: id, summary: last?.message ?? "", incomplete: status !== "resolved", units_proposed: sum?.n ?? 0 };
+  }
+
+  const requestId = reqRow.id;
   const origin = { lat: hosp.lat, lng: hosp.lng };
   const called = new Set<string>();
   const offers: Offers = new Map();

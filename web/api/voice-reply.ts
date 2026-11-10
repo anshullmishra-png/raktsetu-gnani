@@ -10,7 +10,7 @@
 // transcript can cause is a proposal a human must approve, capped at the
 // units the hospital asked for.
 
-import { audit, gemini, GEMINI_MODEL, isAdmin, json, killSwitch, logCall, one, q } from "./_lib/core.js";
+import { audit, gemini, GEMINI_MODEL, isAdmin, json, killSwitch, logCall, one, q, sleep } from "./_lib/core.js";
 import {
   decideVoiceAction, EXTRACT_SCHEMA, EXTRACT_SYSTEM, type Extraction, isUuid, redactPII,
   validateExtraction, wavDurationSeconds,
@@ -58,6 +58,13 @@ async function extract(transcript: string): Promise<{ raw: unknown; spans: strin
 }
 
 export async function POST(request: Request): Promise<Response> {
+  let claimedId: string | null = null;
+  const release = async () => {
+    // Give the session back so the user can retry with the same consent.
+    if (claimedId) {
+      await q("update voice_calls set status = 'awaiting_audio' where id = $1 and status = 'processing'", [claimedId]).catch(() => {});
+    }
+  };
   try {
     const blocked = await killSwitch("voice-reply");
     if (blocked) return blocked;
@@ -90,12 +97,33 @@ export async function POST(request: Request): Promise<Response> {
       await audit("system", "voice_refused_no_session", {});
       return json({ error: "consent_required", message: "No consented voice session. Nothing was transcribed." }, 403);
     }
-    if (vc.status !== "awaiting_audio") {
-      return json({ error: "session_already_used", message: "This voice session already has a reply. Start a new one." }, 409);
-    }
     if (Date.now() - new Date(vc.consent_at).getTime() > 30 * 60 * 1000) {
       return json({ error: "session_expired", message: "Consent was given more than 30 minutes ago. Start a new session." }, 410);
     }
+    // One reply per consented session. The claim is atomic, so a re-sent
+    // request (browsers can repeat a slow POST) cannot transcribe twice or
+    // create two proposals: it waits for the first and returns its result.
+    const claimed = await one(
+      "update voice_calls set status = 'processing', updated_at = now() where id = $1 and status = 'awaiting_audio' returning id", [vc.id]);
+    if (!claimed) {
+      let row = vc;
+      for (let i = 0; i < 25 && row.status === "processing"; i++) {
+        await sleep(1500);
+        row = await one("select * from voice_calls where id = $1", [vc.id]);
+      }
+      if (row.status !== "completed") {
+        return json({ error: "session_busy", message: "This reply is still being processed. Please wait a moment." }, 409);
+      }
+      return json({
+        transcript: row.transcript ?? "", model: row.model, language_code: row.language_code,
+        extraction: {
+          units_available: row.units_reported, will_hold: row.will_hold, collection_hours: row.collection_hours,
+          off_topic: row.off_topic === true, needs_review: row.needs_review === true, pii_redacted: row.pii_redacted === true,
+        },
+        outcome: row.outcome, message: row.result_message ?? "This reply was already processed.", proposal_id: null,
+      });
+    }
+    claimedId = vc.id;
 
     const reqRow = await one("select units_needed from requests where id = $1", [vc.request_id]);
     const bank = await one("select name from blood_banks where id = $1", [vc.bank_id]);
@@ -108,12 +136,12 @@ export async function POST(request: Request): Promise<Response> {
       transcriptRaw = testTranscript;
       model = "test-transcript (Prisma skipped)";
     } else {
-      if (!audio) return json({ error: "bad_request", message: "An audio file is required." }, 400);
-      if (audio.size > MAX_BYTES) return json({ error: "audio_too_large", message: "Clip is too large. Keep it under 30 seconds." }, 413);
+      if (!audio) { await release(); return json({ error: "bad_request", message: "An audio file is required." }, 400); }
+      if (audio.size > MAX_BYTES) { await release(); return json({ error: "audio_too_large", message: "Clip is too large. Keep it under 30 seconds." }, 413); }
       const bytes = new Uint8Array(await audio.arrayBuffer());
       const secs = wavDurationSeconds(bytes);
-      if (secs === null) return json({ error: "bad_audio", message: "Audio must be a WAV file." }, 400);
-      if (secs > MAX_SECONDS + 0.5) return json({ error: "audio_too_long", message: "Prisma accepts at most 30 seconds per clip." }, 413);
+      if (secs === null) { await release(); return json({ error: "bad_audio", message: "Audio must be a WAV file." }, 400); }
+      if (secs > MAX_SECONDS + 0.5) { await release(); return json({ error: "audio_too_long", message: "Prisma accepts at most 30 seconds per clip." }, 413); }
 
       const stt = await transcribe(bytes, vc.language_code);
       transcriptRaw = stt.transcript;
@@ -124,7 +152,8 @@ export async function POST(request: Request): Promise<Response> {
     }
 
     if (!transcriptRaw) {
-      await q("update voice_calls set status = 'completed', model = $2, transcript = '', outcome = 'no_speech', updated_at = now() where id = $1",
+      // Stay open: the same consented session can be used for another try.
+      await q("update voice_calls set status = 'awaiting_audio', model = $2, outcome = 'no_speech', updated_at = now() where id = $1",
         [vc.id, model]);
       await logCall(vc.request_id, vc.bank_id, "voice", `Voice reply from ${bankName}: no speech detected. Nothing changed.`);
       await audit("system", "voice_no_speech", { voice_call_id: vc.id }, vc.request_id, vc.bank_id);
@@ -143,7 +172,7 @@ export async function POST(request: Request): Promise<Response> {
     const piiRedacted = first.redacted || second.redacted;
 
     // ── 3. Validate in code ──
-    const ex: Extraction = validateExtraction(raw, transcript);
+    const ex: Extraction = validateExtraction(raw, transcript, vc.blood_group);
     const action = decideVoiceAction(ex);
 
     await audit("system", "voice_extracted", {
@@ -208,16 +237,16 @@ export async function POST(request: Request): Promise<Response> {
     } else {
       outcome = "declined";
       message = ex.needs_review
-        ? "The number heard could not be verified against the words spoken. Nothing changed; please re-record or check by hand."
+        ? "What was heard could not be verified (the number or the blood group did not match). Nothing changed; please re-record or check by hand."
         : "The reply did not clearly state units and a hold. Nothing changed.";
       await logCall(vc.request_id, vc.bank_id, "voice", `Voice reply from ${bankName} was unclear. Nothing changed.`);
     }
 
     await q(
       `update voice_calls set status = 'completed', model = $2, transcript = $3, units_reported = $4, will_hold = $5,
-         collection_hours = $6, off_topic = $7, pii_redacted = $8, needs_review = $9, outcome = $10, updated_at = now()
+         collection_hours = $6, off_topic = $7, pii_redacted = $8, needs_review = $9, outcome = $10, result_message = $11, updated_at = now()
        where id = $1`,
-      [vc.id, model, transcript, ex.units_available, ex.will_hold, ex.collection_hours, ex.off_topic, piiRedacted, ex.needs_review, outcome]);
+      [vc.id, model, transcript, ex.units_available, ex.will_hold, ex.collection_hours, ex.off_topic, piiRedacted, ex.needs_review, outcome, message]);
 
     return json({
       transcript, model, language_code: vc.language_code,
@@ -225,6 +254,7 @@ export async function POST(request: Request): Promise<Response> {
       outcome, message, proposal_id: proposalId,
     });
   } catch (e) {
+    await release();
     return json({ error: "voice_reply_failed", message: String(e).slice(0, 400) }, 500);
   }
 }

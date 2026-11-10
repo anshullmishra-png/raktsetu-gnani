@@ -3,6 +3,8 @@ import pg from "pg";
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, max: 3, idleTimeoutMillis: 10_000 });
 
+pool.on("error", () => { /* an idle connection dropped; the pool replaces it */ });
+
 /** Privileged query as the database owner. Only ever called with parameterised SQL. */
 export async function q<T = any>(text: string, params: unknown[] = []): Promise<T[]> {
   const res = await pool.query(text, params as any[]);

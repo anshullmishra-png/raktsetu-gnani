@@ -220,7 +220,17 @@ export type Extraction = {
   needs_review: boolean;
 };
 
-export function validateExtraction(raw: unknown, transcript: string): Extraction {
+/** Blood groups named in Latin-script speech, e.g. "o negative", "AB positive", "B+". */
+export function spokenGroups(raw: unknown): string[] {
+  const text = String(raw ?? "").toLowerCase();
+  const out = new Set<string>();
+  for (const m of text.matchAll(/\b(ab|a|b|o)[\s-]*(positive|negative|pos\b|neg\b|\+|-(?!\w))/g)) {
+    out.add(m[1].toUpperCase() + (m[2].startsWith("p") || m[2] === "+" ? "+" : "-"));
+  }
+  return [...out];
+}
+
+export function validateExtraction(raw: unknown, transcript: string, expectedGroup?: string): Extraction {
   const closed: Extraction = {
     units_available: null, will_hold: null, collection_hours: null, off_topic: true, needs_review: false,
   };
@@ -254,6 +264,13 @@ export function validateExtraction(raw: unknown, transcript: string): Extraction
     if (!spoken.includes(units)) { needsReview = true; units = null; }
   } else if (units === 0) {
     if (!none && spoken.some((n) => n > 0)) { needsReview = true; units = null; }
+  }
+
+  // The bank must be talking about the group this session asked for. If the
+  // reply names only other groups, a person has to look at it.
+  if (expectedGroup) {
+    const named = spokenGroups(transcript);
+    if (named.length > 0 && !named.includes(expectedGroup)) { needsReview = true; units = null; }
   }
 
   return { units_available: units, will_hold: willHold, collection_hours: hours, off_topic: false, needs_review: needsReview };

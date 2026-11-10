@@ -134,9 +134,11 @@ create table if not exists voice_calls (
   pii_redacted     boolean,
   needs_review     boolean,
   outcome          text,
+  result_message   text,
   created_at       timestamptz not null default now(),
   updated_at       timestamptz not null default now()
 );
+alter table voice_calls add column if not exists result_message text;
 
 -- ───────────────────────── donors ─────────────────────────
 
