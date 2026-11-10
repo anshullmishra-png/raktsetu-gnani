@@ -26,6 +26,10 @@ export default function App() {
     const scroll = () => {
       const max = root.scrollHeight - window.innerHeight;
       root.style.setProperty("--scroll", String(max > 0 ? window.scrollY / max : 0));
+      // Safety net for the scroll reveal: nothing on screen may stay hidden.
+      document.querySelectorAll(".reveal:not(.in)").forEach((el) => {
+        if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add("in");
+      });
     };
     window.addEventListener("pointermove", move, { passive: true });
     window.addEventListener("scroll", scroll, { passive: true });
