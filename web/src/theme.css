@@ -755,3 +755,181 @@ tbody tr:hover {
     font-size: 22px;
   }
 }
+
+/* ---------- animated map ---------- */
+
+.live-grid {
+  grid-template-columns: 1fr !important;
+}
+.live-grid > div:last-child {
+  order: -1;
+}
+.map-box.map-big {
+  height: 460px;
+  animation: map-open 0.7s ease both;
+  box-shadow: 0 8px 32px rgba(74, 157, 126, 0.12);
+}
+.map-box.map-big .leaflet-container {
+  height: 100%;
+}
+@keyframes map-open {
+  from { opacity: 0; transform: scaleY(0.6); transform-origin: top; }
+  to { opacity: 1; transform: scaleY(1); }
+}
+.log {
+  max-height: 260px;
+}
+
+.mk {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+}
+.mk .core,
+.mk .ring {
+  position: absolute;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+.mk .core {
+  width: 14px;
+  height: 14px;
+  background: #5b8fc4;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  transition: background 0.5s ease, width 0.4s ease, height 0.4s ease;
+  animation: mk-pop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+.mk .ring {
+  width: 14px;
+  height: 14px;
+  opacity: 0;
+}
+.mk .tag {
+  position: absolute;
+  left: 0;
+  bottom: 14px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font: 600 11px/1.2 "Inter", sans-serif;
+  padding: 4px 9px;
+  border-radius: 100px;
+  background: #fff;
+  color: #2c3e50;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  animation: tag-pop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+.mk .tag b {
+  display: inline-block;
+  min-width: 16px;
+  height: 16px;
+  line-height: 16px;
+  text-align: center;
+  border-radius: 50%;
+  background: #4a9d7e;
+  color: #fff;
+  margin-right: 3px;
+}
+.mk .tag-ok {
+  border-color: rgba(74, 157, 126, 0.5);
+  color: #2f7a5e;
+}
+.mk .tag-call {
+  border-color: #fde68a;
+  color: #b45309;
+}
+.mk .tag-donor {
+  bottom: 40px;
+  background: #5b8fc4;
+  color: #fff;
+  border-color: #5b8fc4;
+  animation-delay: 0.2s;
+}
+
+.mk-hospital .core {
+  width: 20px;
+  height: 20px;
+  background: #dc2626;
+  border-width: 3px;
+}
+.mk-hospital .ring {
+  background: rgba(220, 38, 38, 0.35);
+  animation: mk-pulse 1.8s ease-out infinite;
+}
+.mk-hospital .tag {
+  bottom: 18px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #2c3e50;
+  color: #fff;
+  border-color: #2c3e50;
+}
+
+.mk-calling .core {
+  background: #d97706;
+  width: 16px;
+  height: 16px;
+}
+.mk-calling .ring {
+  background: rgba(217, 119, 6, 0.45);
+  animation: mk-pulse 1s ease-out infinite;
+}
+.mk-ok .core {
+  background: #4a9d7e;
+  width: 20px;
+  height: 20px;
+  box-shadow: 0 0 0 6px rgba(74, 157, 126, 0.25), 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+.mk-stop .ring {
+  background: rgba(74, 157, 126, 0.4);
+  animation: mk-pulse 2s ease-out infinite;
+}
+.mk-voice .core {
+  background: #5b6fc4;
+}
+/* no blood: the marker drops off */
+.mk-no .core {
+  background: #dc2626;
+  animation: mk-drop 1.1s ease-in forwards;
+}
+
+@keyframes mk-pop {
+  from { transform: translate(-50%, -50%) scale(0); }
+  to { transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes tag-pop {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px) scale(0.8); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+@keyframes mk-pulse {
+  0% { width: 14px; height: 14px; opacity: 0.9; }
+  100% { width: 64px; height: 64px; opacity: 0; }
+}
+@keyframes mk-drop {
+  0% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; background: #dc2626; }
+  60% { transform: translate(-50%, 40%) scale(0.8); opacity: 0.7; }
+  100% { transform: translate(-50%, 120%) scale(0.35); opacity: 0.35; background: #9ca3af; }
+}
+.call-line {
+  animation: dash-move 0.8s linear infinite;
+}
+@keyframes dash-move {
+  to { stroke-dashoffset: -24; }
+}
+.route-line {
+  stroke-dasharray: 2000;
+  stroke-dashoffset: 2000;
+  animation: route-draw 1.6s ease-out forwards;
+}
+@keyframes route-draw {
+  to { stroke-dashoffset: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mk .core, .mk .ring, .mk .tag, .call-line, .route-line, .map-box.map-big { animation: none !important; }
+  .route-line { stroke-dashoffset: 0; }
+  .mk-no .core { opacity: 0.35; background: #9ca3af; }
+}
+.map-box.map-big .leaflet-tile-pane { filter: saturate(0.45) brightness(1.06); }

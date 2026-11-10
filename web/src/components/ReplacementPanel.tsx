@@ -8,9 +8,10 @@ interface Props {
   requestId: string;
   holds: Hold[];
   bankById: Map<string, BloodBank>;
+  onOffered?: () => void;
 }
 
-export default function ReplacementPanel({ requestId, holds, bankById }: Props) {
+export default function ReplacementPanel({ requestId, holds, bankById, onOffered }: Props) {
   const [offered, setOffered] = useState(false);
   const [offerBusy, setOfferBusy] = useState(false);
   const [offerError, setOfferError] = useState<string | null>(null);
@@ -56,6 +57,7 @@ export default function ReplacementPanel({ requestId, holds, bankById }: Props) 
       return;
     }
     setOffered(true);
+    onOffered?.();
   }
 
   async function submit(e: FormEvent) {

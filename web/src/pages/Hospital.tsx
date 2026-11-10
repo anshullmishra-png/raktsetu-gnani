@@ -3,7 +3,7 @@ import { ApiError, CALLS_PAUSED_MESSAGE, dispatchRequest, publicApi } from "../a
 import { BLOOD_GROUPS, BloodBank, Hospital as HospitalRow, errText } from "../types";
 import { useRequestLive } from "../components/useRequestLive";
 import CallLog from "../components/CallLog";
-import BankMap, { MapBank } from "../components/BankMap";
+import BankMap, { MapBank, RouteStop } from "../components/BankMap";
 import Proposals from "../components/Proposals";
 import VoicePanel from "../components/VoicePanel";
 import HoldsPanel from "../components/HoldsPanel";
@@ -51,6 +51,7 @@ export default function Hospital() {
   // Snapshot of what was actually requested, so later steps stay consistent if the form is edited.
   const [active, setActive] = useState<{ hospital: HospitalRow; group: string; units: number } | null>(null);
   const [dispatching, setDispatching] = useState(false);
+  const [replacement, setReplacement] = useState(false);
   const [summary, setSummary] = useState<{ text: string; incomplete: boolean } | null>(null);
   const [dispatchError, setDispatchError] = useState<string | null>(null);
 
@@ -105,15 +106,39 @@ export default function Hospital() {
   const bankById = useMemo(() => new Map(banks.map((b) => [b.id, b])), [banks]);
 
   const mapBanks = useMemo<MapBank[]>(() => {
-    const latest = new Map<string, string>();
-    for (const r of live.log) if (r.bank_id) latest.set(r.bank_id, r.event);
+    const latest = new Map<string, { event: string; units: number }>();
+    for (const r of live.log) if (r.bank_id) latest.set(r.bank_id, { event: r.event, units: r.units_offered ?? 0 });
     const out: MapBank[] = [];
-    for (const [id, event] of latest) {
+    for (const [id, v] of latest) {
       const bank = bankById.get(id);
-      if (bank) out.push({ bank, event });
+      if (bank) out.push({ bank, event: v.event, units: v.units });
     }
     return out;
   }, [live.log, bankById]);
+
+  // Collection route: banks we propose to fill the request from, most units first.
+  const route = useMemo<RouteStop[]>(() => {
+    const per = new Map<string, { units: number; held: boolean }>();
+    for (const p of live.proposals) {
+      if (p.status !== "pending") continue;
+      const v = per.get(p.bank_id) ?? { units: 0, held: false };
+      v.units += p.units;
+      per.set(p.bank_id, v);
+    }
+    for (const h of live.holds) {
+      if (h.status !== "active" && h.status !== "fulfilled") continue;
+      const v = per.get(h.bank_id) ?? { units: 0, held: false };
+      v.units += h.units;
+      v.held = true;
+      per.set(h.bank_id, v);
+    }
+    const out: RouteStop[] = [];
+    for (const [id, v] of per) {
+      const bank = bankById.get(id);
+      if (bank) out.push({ bank, units: v.units, held: v.held });
+    }
+    return out.sort((a, b) => b.units - a.units);
+  }, [live.proposals, live.holds, bankById]);
 
   const pending = useMemo(() => live.proposals.filter((p) => p.status === "pending"), [live.proposals]);
 
@@ -146,6 +171,7 @@ export default function Hospital() {
     setDispatching(true);
     try {
       // Start polling for live updates, then ask the assistant to start (it can take 30 to 90 seconds).
+      setReplacement(false);
       live.start(requestId);
       const res = await dispatchRequest({
         request_id: requestId,
@@ -270,7 +296,7 @@ export default function Hospital() {
             )}
             <div className="live-grid">
               <CallLog rows={live.log} bankById={bankById} waiting={dispatching} />
-              <BankMap hospital={active.hospital} banks={mapBanks} />
+              <BankMap hospital={active.hospital} banks={mapBanks} route={route} replacement={replacement} />
             </div>
             {summary && (
               <div className={`notice ${summary.incomplete ? "notice-warn" : "notice-ok"}`} role="status">
@@ -313,7 +339,7 @@ export default function Hospital() {
           </Step>
 
           <Step n={6} title="Replacement donation">
-            <ReplacementPanel requestId={requestId} holds={live.holds} bankById={bankById} />
+            <ReplacementPanel requestId={requestId} holds={live.holds} bankById={bankById} onOffered={() => setReplacement(true)} />
           </Step>
         </>
       )}
