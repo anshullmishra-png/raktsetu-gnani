@@ -1,6 +1,7 @@
 # LinkedIn post (draft, written as Anshull)
 
-Attach: `docs/raktsetu-demo.mp4` (1 min 51 s, narrated by Gnani Timbre).
+Attach: `docs/raktsetu-demo-45s.mp4` (42 seconds, narrated by Gnani Timbre). The full
+1 min 51 s version is `docs/raktsetu-demo.mp4`.
 When posting, turn the three names into real tags: Gnani.ai, Mesa School of
 Business, and Agnesh M P.
 
