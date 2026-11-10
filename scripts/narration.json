@@ -1,0 +1,77 @@
+[
+  {
+    "caption": "The portal lists 4 units of O−. The listing is 31 hours old.",
+    "src": "/narration/00.mp3",
+    "dur": 5.02
+  },
+  {
+    "caption": "RaktSetu checks before anyone travels.",
+    "src": "/narration/01.mp3",
+    "dur": 2.14
+  },
+  {
+    "caption": "A hospital asks for 2 units of O−. No patient details.",
+    "src": "/narration/02.mp3",
+    "dur": 4.37
+  },
+  {
+    "caption": "Nearby banks are checked at once. Stale listings drop off the map.",
+    "src": "/narration/03.mp3",
+    "dur": 4.06
+  },
+  {
+    "caption": "One bank really has it. The assistant proposes a hold.",
+    "src": "/narration/04.mp3",
+    "dur": 3.1
+  },
+  {
+    "caption": "Nothing is reserved until a person approves.",
+    "src": "/narration/05.mp3",
+    "dur": 2.3
+  },
+  {
+    "caption": "Approved: 2 units held for 30 minutes.",
+    "src": "/narration/06.mp3",
+    "dur": 2.78
+  },
+  {
+    "caption": "Then hear it from the bank. Gnani Timbre speaks the AI disclosure.",
+    "src": "/narration/07.mp3",
+    "dur": 4.54
+  },
+  {
+    "caption": "The speaker consents to being recorded.",
+    "src": "/narration/08.mp3",
+    "dur": 1.97
+  },
+  {
+    "caption": "The bank replies: “Sorry, we ran out of O negative yesterday.”",
+    "src": "/narration/09.mp3",
+    "dur": 3.41
+  },
+  {
+    "caption": "Gnani Prisma transcribes the reply.",
+    "src": "/narration/10.mp3",
+    "dur": 2.14
+  },
+  {
+    "caption": "The bank cannot supply, so the hold is cancelled and the units go back.",
+    "src": "/narration/11.mp3",
+    "dur": 4.22
+  },
+  {
+    "caption": "Admin: one switch pauses everything.",
+    "src": "/narration/12.mp3",
+    "dur": 2.45
+  },
+  {
+    "caption": "Every step is in an audit log nobody can edit.",
+    "src": "/narration/13.mp3",
+    "dur": 2.93
+  },
+  {
+    "caption": "RaktSetu. All data in this demo is synthetic.",
+    "src": "/narration/14.mp3",
+    "dur": 2.78
+  }
+]

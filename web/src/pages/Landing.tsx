@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { PointerEvent as RPointerEvent } from "react";
 import { Link } from "react-router-dom";
 import Story from "./Story";
+import DemoVideo from "../components/DemoVideo";
 import "../story.css";
 
 const Icon = ({ d }: { d: string }) => (
@@ -197,19 +198,10 @@ export default function Landing() {
           <span className="pill-tag">See it work</span>
           <h2>One request, start to finish, in under two minutes</h2>
           <p className="sub">
-            A screen recording of this live site: search, verify, approve a hold, hear the bank, and the hold being
-            cancelled when the bank says no.
+            A narrated screen recording of this live site: search, verify, approve a hold, hear the bank, and the hold
+            being cancelled when the bank says no.
           </p>
-          <div className="video-frame">
-            <video controls preload="metadata" playsInline poster="/demo-poster.png">
-              <source src="/demo.webm" type="video/webm" />
-              Your browser cannot play this video. <a href="/demo.webm">Download it</a> instead.
-            </video>
-          </div>
-          <p className="muted small" style={{ marginTop: 10 }}>
-            The recording has no sound. In the app, the disclosure and reply are spoken by Gnani Timbre, and the
-            bank's reply here is a machine-voice test clip.
-          </p>
+          <DemoVideo />
         </div>
       </section>
 
