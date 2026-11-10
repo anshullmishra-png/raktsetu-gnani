@@ -153,9 +153,11 @@ test("guardrail 4 (database): a hold cannot be inserted without a human-approved
     const p = await db.query(
       "insert into hold_proposals (request_id, bank_id, blood_group, units, source) select $1, id, 'O+', 2, 'agent' from blood_banks limit 1 returning id, bank_id",
       [r.rows[0].id]);
+    await db.query("savepoint before_bad_hold");
     await assert.rejects(db.query(
       "insert into holds (proposal_id, request_id, bank_id, blood_group, units, expires_at) values ($1, $2, $3, 'O+', 2, now() + interval '30 minutes')",
       [p.rows[0].id, r.rows[0].id, p.rows[0].bank_id]), /hold_requires_human_approved_proposal/);
+    await db.query("rollback to savepoint before_bad_hold");
     const bad = await db.query("select place_hold_atomic($1, 'agent', 30) as r", [p.rows[0].id]);
     assert.equal(bad.rows[0].r.ok, false);
     assert.equal(bad.rows[0].r.reason, "approver_must_be_human_role");
@@ -193,8 +195,11 @@ async function setup() {
     "select bank_id from stock where blood_group = $1 and units >= 3 order by bank_id limit 1", [group]);
   bankId = s.rows[0].bank_id;
 }
-async function session(consent: unknown = true) {
-  return api("voice-start", { request_id: requestId, bank_id: bankId, blood_group: group, language_code: "en-IN", consent });
+async function session(...consent: unknown[]) {
+  // No argument means consent:true. An explicit undefined is sent as "field absent".
+  const body: Record<string, unknown> = { request_id: requestId, bank_id: bankId, blood_group: group, language_code: "en-IN" };
+  if (consent.length === 0) body.consent = true; else if (consent[0] !== undefined) body.consent = consent[0];
+  return api("voice-start", body);
 }
 const counts = async () => (await db.query(
   `select (select count(*)::int from holds where request_id = $1) as holds,
@@ -293,13 +298,14 @@ test("hold lifecycle: fulfil works once; the expiry sweep only touches active ho
       return { hold: h.rows[0].r.hold_id as string, bank: p.rows[0].bank_id as string };
     };
     const a = await mk(), b = await mk();
-    const units = async () => (await db.query("select units from stock where bank_id = $1 and blood_group = 'O+'", [a.bank])).rows[0].units;
-    const u = await units();
+    const units = async (bank: string) => (await db.query("select units from stock where bank_id = $1 and blood_group = 'O+'", [bank])).rows[0].units;
+    const total = async () => (a.bank === b.bank ? await units(a.bank) : (await units(a.bank)) + (await units(b.bank)));
+    const u = await total();
     assert.equal((await db.query("select fulfil_hold($1) as r", [a.hold])).rows[0].r.ok, true);
     assert.equal((await db.query("select fulfil_hold($1) as r", [a.hold])).rows[0].r.ok, false);
     await db.query("update holds set expires_at = now() - interval '1 minute' where id in ($1, $2)", [a.hold, b.hold]);
     assert.equal((await db.query("select release_expired_holds() as n")).rows[0].n, 1, "only the active hold expires");
-    assert.equal(await units(), u + 1, "fulfilled units are not returned; expired units are");
+    assert.equal(await total(), u + 1, "fulfilled units are not returned; expired units are");
     const st = (await db.query("select status from holds where id in ($1, $2) order by status", [a.hold, b.hold])).rows.map((x: any) => x.status);
     assert.deepEqual(st, ["expired", "fulfilled"]);
   });

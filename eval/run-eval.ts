@@ -11,6 +11,7 @@
 
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
+import { createRequire } from "node:module";
 import { basename, extname, join } from "node:path";
 import {
   decideVoiceAction, EXTRACT_SCHEMA, EXTRACT_SYSTEM, redactPII, validateExtraction,
@@ -28,8 +29,7 @@ const need = (k: string) => {
 };
 const GNANI_KEY = need("GNANI_API_KEY");
 const GEMINI_KEY = need("GEMINI_API_KEY");
-const SUPABASE_URL = need("VITE_SUPABASE_URL");
-const SERVICE_KEY = need("SUPABASE_SERVICE_ROLE_KEY");
+const DATABASE_URL = need("DATABASE_URL");
 const GNANI_MODEL = process.env.GNANI_MODEL ?? "prisma-v2.5";
 const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-3.1-flash-lite";
 
@@ -136,18 +136,24 @@ if (!rows.length) {
   process.exit(0);
 }
 
-// Store in eval_runs (service role; the table is not readable with the anon key).
-const ins = await fetch(`${SUPABASE_URL}/rest/v1/eval_runs`, {
-  method: "POST",
-  headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, "Content-Type": "application/json", Prefer: "return=minimal" },
-  body: JSON.stringify(rows.map((r) => ({
-    run_id: runId, clip: r.file, source, language_code: r.language_code, model: r.model,
-    expected_units: r.expected_units, got_units: r.got_units, expected_hold: r.expected_hold, got_hold: r.got_hold,
-    expected_off_topic: r.expected_off_topic, got_off_topic: r.got_off_topic,
-    transcript: r.transcript, pass: r.pass, notes: r.notes || null,
-  }))),
-});
-const stored = ins.ok ? "stored in eval_runs" : `NOT stored in eval_runs (HTTP ${ins.status})`;
+// Store in eval_runs (owner connection; the table is unreachable for the public role).
+let stored = "stored in eval_runs";
+try {
+  const pg = createRequire(new URL("../web/package.json", import.meta.url))("pg");
+  const db = new pg.Client({ connectionString: DATABASE_URL });
+  await db.connect();
+  for (const r of rows) {
+    await db.query(
+      `insert into eval_runs (run_id, clip, source, language_code, model, expected_units, got_units, expected_hold, got_hold,
+         expected_off_topic, got_off_topic, transcript, pass, notes)
+       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
+      [runId, r.file, source, r.language_code, r.model, r.expected_units, r.got_units, r.expected_hold, r.got_hold,
+        r.expected_off_topic, r.got_off_topic, r.transcript, r.pass, r.notes || null]);
+  }
+  await db.end();
+} catch (e) {
+  stored = "NOT stored in eval_runs (" + String(e).slice(0, 80) + ")";
+}
 
 const passed = rows.filter((r) => r.pass).length;
 const byLang = new Map<string, { n: number; p: number }>();

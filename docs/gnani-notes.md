@@ -57,4 +57,29 @@ the transcript was cut short.
 
 ## Real test call
 
-_To be filled from an actual request (see below)._
+Made on 10 Nov 2026 with `eval/clips-tts/01-en-four.wav` (a Windows
+text-to-speech clip, 16 kHz mono WAV), `language_code=en-IN`,
+`model=prisma-v2.5`, `format=transcribe`. Raw response:
+
+```json
+{
+  "success": true,
+  "request_id": "01a1c5ed-f9bd-799f-aee7-6c3ca4b4b014",
+  "transcript": "yes we have four units of o negative we can hold them for 30 minutes collect before 8 pm",
+  "model": "prisma-v2.5",
+  "processing_time": 0.19103741645812988,
+  "end_to_end_latency": 0.30155467987060547,
+  "output": {
+    "literal": "yes we have four units of o negative we can hold them for thirty minutes collect before eight pm"
+  }
+}
+```
+
+What this showed that the docs did not spell out:
+
+- Output is lowercase with no punctuation, so capital letters cannot be used
+  to spot names.
+- With `format=transcribe`, "thirty minutes" and "eight PM" became digits but
+  "four units" stayed a word. The unit parser therefore needs number words as
+  well as digits, even with ITN on.
+- "first come, first served" came back as "1st come 1st served".

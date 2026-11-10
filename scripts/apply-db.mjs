@@ -30,7 +30,7 @@ try {
     (select count(*) from stock) as stock_rows,
     (select count(*) from stock where blood_group like '%-' and units > 0) as rh_neg_in_stock,
     (select count(*) from stock where last_updated < now() - interval '24 hours') as stale_rows`);
-  console.log("Seeded:", c.rows[0]);
+  console.log("Seeded: " + JSON.stringify(c.rows[0]));
 } finally {
   await client.end();
 }

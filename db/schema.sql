@@ -15,14 +15,14 @@
 
 create extension if not exists pgcrypto;
 
-do $
+do $$
 begin
   if not exists (select 1 from pg_roles where rolname = 'raktsetu_public') then
     create role raktsetu_public nologin;
   end if;
   -- let the owner SET ROLE to it (the explicit SET option is needed on PG16+)
   execute format('grant raktsetu_public to %I with set true', current_user);
-end $;
+end $$;
 grant usage on schema public to raktsetu_public;
 
 -- ───────────────────────── core tables ─────────────────────────

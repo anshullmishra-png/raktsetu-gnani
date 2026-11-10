@@ -136,7 +136,7 @@ const NAME_CUES = [
   "name of the patient is", "mera naam", "mera nam", "patient ka naam", "patient ka nam",
   "मेरा नाम", "मरीज का नाम", "मरीज़ का नाम", "पेशेंट का नाम", "ನನ್ನ ಹೆಸರು", "ರೋಗಿಯ ಹೆಸರು", "ಪೇಷೆಂಟ್ ಹೆಸರು",
 ];
-const STOP_WORDS = new Set(["is", "hai", "he", "and", "we", "the", "a", "है", "ಮತ್ತು"]);
+const STOP_WORDS = new Set(["is", "hai", "he", "and", "we", "i", "the", "a", "call", "calling", "speaking", "from", "here", "please", "you", "with", "at", "of", "in", "on", "our", "my", "have", "has", "will", "can", "aur", "hum", "humare", "yahan", "se", "है", "और", "ಮತ್ತು"]);
 
 export function redactPII(raw: string, extraSpans: string[] = []): { text: string; redacted: boolean } {
   let text = String(raw ?? "");
@@ -155,14 +155,22 @@ export function redactPII(raw: string, extraSpans: string[] = []): { text: strin
       if (at < 0) break;
       const start = at + cue.length;
       const rest = text.slice(start);
-      // Take up to two following words as the name.
-      const m = rest.match(/^(\s+(?:is\s+|hai\s+)?)([^\s.,!?।]+)(\s+[^\s.,!?।]+)?/);
+      // Take up to three following words as the name, stopping at a common
+      // non-name word. Prisma v2.5 returns lowercase text, so capital letters
+      // cannot be used to tell where a name ends.
+      const m = rest.match(/^(\s+(?:is\s+|hai\s+)?)((?:[^\s.,!?।]+\s*){1,3})/);
       if (m && !m[2].startsWith("[")) {
-        // A second word counts as a surname only if it is capitalised Latin.
-        const w2 = (m[3] ?? "").trim();
-        const second = w2 && !STOP_WORDS.has(w2.toLowerCase()) && /^[A-Z]/.test(w2) ? m[3] : "";
-        const cut = m[1].length + m[2].length + second.length;
-        text = text.slice(0, start) + m[1] + "[name removed]" + text.slice(start + cut);
+        const words = m[2].split(/(\s+)/);
+        let keep = "";
+        let count = 0;
+        for (let i = 0; i < words.length; i += 2) {
+          const w = words[i];
+          if (!w || w.startsWith("[")) break;
+          if (count > 0 && (STOP_WORDS.has(w.toLowerCase()) || /^\d/.test(w))) break;
+          keep += (i > 0 ? words[i - 1] : "") + w;
+          count++;
+        }
+        text = text.slice(0, start) + m[1] + "[name removed]" + text.slice(start + m[1].length + keep.length);
         redacted = true;
       }
       from = start + 1;
