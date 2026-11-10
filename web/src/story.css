@@ -116,3 +116,12 @@
 @media (min-width: 760px) {
   .road-row { grid-template-columns: 90px 260px 1fr; }
 }
+
+.demo-video { padding-top: 48px; padding-bottom: 24px; }
+.demo-video h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); color: #02475b; margin: 14px 0 8px; }
+.video-frame {
+  border-radius: 20px; overflow: hidden; background: #02475b; padding: 8px;
+  box-shadow: 0 24px 60px rgba(2, 71, 91, 0.22); border: 1px solid rgba(0, 179, 142, 0.35);
+  background: linear-gradient(135deg, #02475b, #00b38e);
+}
+.video-frame video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 14px; background: #000; }
