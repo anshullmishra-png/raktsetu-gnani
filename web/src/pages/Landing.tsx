@@ -1,33 +1,234 @@
 import { Link } from "react-router-dom";
 
+const Icon = ({ d }: { d: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d={d} />
+  </svg>
+);
+const I = {
+  shield: "M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z",
+  mic: "M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM5 11a7 7 0 0 0 14 0M12 18v3",
+  check: "M5 12l5 5 9-10",
+  user: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0",
+  search: "M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16zM21 21l-4.3-4.3",
+  phone: "M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z",
+  clock: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2",
+  drop: "M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z",
+};
+
 export default function Landing() {
   return (
     <>
-      <h1>RaktSetu</h1>
-      <p className="lead">
-        A bridge between hospitals, blood banks and donors. Tell us who you are and we will take you to the right
-        place. No login needed.
-      </p>
-      <div className="role-grid">
-        <Link to="/hospital" className="role-card">
-          <h2>Hospital</h2>
-          <p>Find blood for a request, hear back from blood banks, and approve a hold.</p>
-          <span className="go">I need blood →</span>
-        </Link>
-        <Link to="/donate" className="role-card">
-          <h2>Donor</h2>
-          <p>Register as a donor and see where blood is needed near you.</p>
-          <span className="go">I want to donate →</span>
-        </Link>
-        <Link to="/admin" className="role-card">
-          <h2>Admin</h2>
-          <p>Pause or resume calls, review the audit log, transcripts and pledges.</p>
-          <span className="go">I look after the service →</span>
-        </Link>
-      </div>
-      <p className="muted" style={{ marginTop: 16 }}>
-        The assistant proposes. A person decides. We never ask for patient details.
-      </p>
+      <section className="hero">
+        <div className="hero-grid">
+          <div>
+            <span className="pill-tag fade-up">
+              <Icon d={I.drop} /> Blood dispatch assistant · Bengaluru
+            </span>
+            <h1 className="fade-up d1">
+              The portal says 4 units. <em>The shelf says zero.</em>
+            </h1>
+            <p className="lead fade-up d2">
+              RaktSetu checks stale blood bank listings before anyone travels. It finds compatible stock, hears the
+              bank's answer in their own words, and proposes a hold that a person at the hospital approves.
+            </p>
+            <div className="hero-cta fade-up d3">
+              <Link to="/hospital" className="btn btn-primary">
+                Find blood
+              </Link>
+              <Link to="/donate" className="btn btn-secondary">
+                Register as a donor
+              </Link>
+            </div>
+            <div className="stats-row fade-up d4">
+              <div>
+                <div className="stat-num">55</div>
+                <div className="stat-label">demo blood banks</div>
+              </div>
+              <div>
+                <div className="stat-num">80 km</div>
+                <div className="stat-label">search radius</div>
+              </div>
+              <div>
+                <div className="stat-num">30 min</div>
+                <div className="stat-label">hold window</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="hero-card fade-up d2" aria-label="Example of a stale listing">
+            <span className="pill-tag">
+              <Icon d={I.clock} /> What the portal shows
+            </span>
+            <div className="listing" style={{ marginTop: 12 }}>
+              <div className="row">
+                <b>Karuna Blood Centre, Jayanagar</b>
+                <span>O−</span>
+              </div>
+              <div className="row" style={{ marginTop: 6 }}>
+                <span>
+                  <span className="dot y" />
+                  Listed: 4 units · updated 31 hours ago
+                </span>
+              </div>
+            </div>
+            <div className="listing">
+              <div className="row">
+                <span>
+                  <span className="dot r" />
+                  Heard on the call: "we ran out yesterday"
+                </span>
+              </div>
+            </div>
+            <div className="listing" style={{ marginBottom: 0 }}>
+              <div className="row">
+                <span>
+                  <span className="dot g" />
+                  Next bank, 2.4 km: 2 units confirmed, hold proposed
+                </span>
+              </div>
+            </div>
+            <div className="benefits">
+              <div className="benefit">
+                <Icon d={I.mic} /> Transcribed by Gnani Prisma
+              </div>
+              <div className="benefit">
+                <Icon d={I.user} /> A person approves every hold
+              </div>
+              <div className="benefit">
+                <Icon d={I.shield} /> No patient details, ever
+              </div>
+              <div className="benefit">
+                <Icon d={I.check} /> Compatibility decided in code
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="section-inner">
+          <span className="pill-tag">Who are you?</span>
+          <h2>Pick where to start</h2>
+          <p className="sub">No login needed for this demo.</p>
+          <div className="role-grid">
+            <Link to="/hospital" className="role-card">
+              <h2>Hospital</h2>
+              <p>Find blood for a request, hear back from blood banks, and approve a hold.</p>
+              <span className="go">I need blood →</span>
+            </Link>
+            <Link to="/donate" className="role-card">
+              <h2>Donor</h2>
+              <p>Register as a donor and see where blood is needed near you.</p>
+              <span className="go">I want to donate →</span>
+            </Link>
+            <Link to="/admin" className="role-card">
+              <h2>Admin</h2>
+              <p>Pause or resume calls, review the audit log, transcripts and pledges.</p>
+              <span className="go">I look after the service →</span>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="section alt">
+        <div className="section-inner">
+          <span className="pill-tag">The problem</span>
+          <h2>Finding a bank is easy. Trusting the listing is not.</h2>
+          <p className="sub">Three things make an emergency blood request slow.</p>
+          <div className="grid-3">
+            <div className="card">
+              <div className="big-num">31 h</div>
+              <p className="t">Listings go stale</p>
+              <p className="b">The demo's opening listing was last updated 31 hours ago. The bank ran out the day before.</p>
+            </div>
+            <div className="card">
+              <div className="big-num">~6%</div>
+              <p className="t">Rh-negative is scarce</p>
+              <p className="b">Roughly 6 percent of people in India are Rh-negative, so most banks hold none of a given negative group.</p>
+            </div>
+            <div className="card">
+              <div className="big-num">1 of 8</div>
+              <p className="t">O− can only receive O−</p>
+              <p className="b">An O-negative patient has no compatible alternative. Widening the radius is the only fallback.</p>
+            </div>
+          </div>
+          <div className="callout">
+            "The portal shows four units of O negative. The bank ran out yesterday. Somebody is about to drive across
+            the city for nothing."
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="section-inner">
+          <span className="pill-tag">How it works</span>
+          <h2>Four steps, one human decision</h2>
+          <p className="sub">The assistant proposes. A person decides.</p>
+          <div className="grid-4">
+            {[
+              { n: "01", i: I.search, t: "Search", b: "Blood group, units and hospital. Compatible stock within 80 km, exact matches first." },
+              { n: "02", i: I.phone, t: "Verify", b: "Each listing is checked. Stale ones fail, and you see why in the live log." },
+              { n: "03", i: I.mic, t: "Hear the bank", b: "After an AI disclosure and consent, the bank's spoken reply is transcribed by Gnani Prisma." },
+              { n: "04", i: I.check, t: "Approve the hold", b: "Nothing is reserved until you approve. Holds last 30 minutes and cancel if the bank says no." },
+            ].map((p) => (
+              <div className="card phase" key={p.n}>
+                <span className="wm" aria-hidden="true">
+                  {p.n}
+                </span>
+                <div className="ico">
+                  <Icon d={p.i} />
+                </div>
+                <p className="t" style={{ fontSize: 15, fontWeight: 700 }}>
+                  {p.t}
+                </p>
+                <p className="b" style={{ fontSize: 12 }}>
+                  {p.b}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section alt">
+        <div className="section-inner">
+          <span className="pill-tag">
+            <Icon d={I.shield} /> Guardrails
+          </span>
+          <h2>What the system will not do</h2>
+          <p className="sub">Each rule is enforced in code or in the database, and has an automated test.</p>
+          <div className="table-wrap trust">
+            <table>
+              <thead>
+                <tr>
+                  <th>Rule</th>
+                  <th>How RaktSetu enforces it</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ["Demo banks only", "The database only stores obviously fictional numbers and refuses a voice session with any non-demo bank."],
+                  ["Disclosure and consent", "No consent tick, no session. No session, no transcription."],
+                  ["No patient data", "A request has no patient field. Names and numbers heard in audio are redacted before storage."],
+                  ["Human approval", "The model has no tool that places a hold. A hold needs an approved proposal."],
+                  ["Kill switch", "One admin switch makes every acting function refuse."],
+                  ["Injection refusal", "Audio is data, never instructions. Off-topic clips change nothing."],
+                  ["Audit log", "Append-only. Even the database owner cannot edit or delete it."],
+                ].map(([a, b]) => (
+                  <tr key={a}>
+                    <td>
+                      <span className="dot g" />
+                      <b>{a}</b>
+                    </td>
+                    <td>{b}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
     </>
   );
 }

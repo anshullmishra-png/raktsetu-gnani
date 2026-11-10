@@ -1,10 +1,11 @@
-import { Link, NavLink, Route, Routes } from "react-router-dom";
+import { Link, NavLink, Route, Routes, useLocation } from "react-router-dom";
 import Landing from "./pages/Landing";
 import Hospital from "./pages/Hospital";
 import Donor from "./pages/Donor";
 import Admin from "./pages/Admin";
 
 export default function App() {
+  const wide = useLocation().pathname === "/";
   return (
     <>
       <div className="demo-banner" role="note">
@@ -19,9 +20,12 @@ export default function App() {
           <NavLink to="/hospital">Hospital</NavLink>
           <NavLink to="/donate">Donor</NavLink>
           <NavLink to="/admin">Admin</NavLink>
+          <Link to="/hospital" className="nav-cta">
+            Find blood
+          </Link>
         </nav>
       </header>
-      <main className="page">
+      <main className={wide ? "page page-wide" : "page"}>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/hospital" element={<Hospital />} />
@@ -40,6 +44,18 @@ export default function App() {
           />
         </Routes>
       </main>
+      <footer className="site-footer">
+        <Link to="/" className="brand">
+          <span className="brand-drop" aria-hidden="true" />
+          RaktSetu
+        </Link>
+        <span>Demo for the Gnani.ai challenge 2026. All data is synthetic.</span>
+        <span className="links">
+          <Link to="/hospital">Hospital</Link>
+          <Link to="/donate">Donor</Link>
+          <Link to="/admin">Admin</Link>
+        </span>
+      </footer>
     </>
   );
 }

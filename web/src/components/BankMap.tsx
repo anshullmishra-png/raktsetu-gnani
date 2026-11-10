@@ -9,7 +9,7 @@ const EVENT_COLOR: Record<string, string> = {
   proposed: "#2f5d7c",
   calling: "#c98a00",
   partial: "#c98a00",
-  confirmed: "#4f6b4f",
+  confirmed: "#4a9d7e",
   held: "#2f472f",
   declined: "#9b2c1c",
   refused: "#9b2c1c",
@@ -63,7 +63,7 @@ export default function BankMap({ hospital, banks }: Props) {
             <CircleMarker
               center={[hospital.lat, hospital.lng]}
               radius={11}
-              pathOptions={{ color: "#3b2a20", weight: 3, fillColor: "#b4432e", fillOpacity: 1 }}
+              pathOptions={{ color: "#2c3e50", weight: 3, fillColor: "#dc2626", fillOpacity: 1 }}
             >
               <Popup>
                 <strong>{hospital.name}</strong>
@@ -102,7 +102,7 @@ export default function BankMap({ hospital, banks }: Props) {
       </div>
       <div className="legend" aria-hidden="true">
         <span>
-          <i style={{ background: "#b4432e" }} />
+          <i style={{ background: "#dc2626" }} />
           Hospital
         </span>
         <span>
@@ -114,7 +114,7 @@ export default function BankMap({ hospital, banks }: Props) {
           Calling / partial
         </span>
         <span>
-          <i style={{ background: "#4f6b4f" }} />
+          <i style={{ background: "#4a9d7e" }} />
           Confirmed / held
         </span>
         <span>
