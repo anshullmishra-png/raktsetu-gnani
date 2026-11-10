@@ -47,7 +47,7 @@ Both Prisma models support: `bn-IN`, `en-IN`, `gu-IN`, `hi-IN`, `kn-IN`, `ml-IN`
 
 **Gnani Prisma v2.5** (`prisma-v2.5`), the default STT model and the one listed on
 the challenge page. The docs also list Prisma v3.0 (`prisma-v3.0`); RaktSetu does
-not use it. The model is set by the `GNANI_MODEL` edge-function secret.
+not use it. The model is set by the optional `GNANI_MODEL` server environment variable.
 
 ## Response shape (from docs)
 
