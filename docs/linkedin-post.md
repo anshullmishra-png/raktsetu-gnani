@@ -11,6 +11,6 @@ That was the theme of the whole build. The number words I'd typed in for Hindi a
 Everything in the demo is synthetic and no real calls are placed.
 
 Demo: https://raktsetu-gnani.vercel.app
-Code: https://github.com/GITHUB_USERNAME/raktsetu-gnani
+Code: https://github.com/anshullmishra-png/raktsetu-gnani
 
 #GreatIndianAIInternshipChallenge #GnaniAI

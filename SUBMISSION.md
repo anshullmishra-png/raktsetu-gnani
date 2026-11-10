@@ -70,5 +70,5 @@ and Hinglish have **not** been evaluated yet.
 ## Links
 
 - Demo: https://raktsetu-gnani.vercel.app
-- Repository: https://github.com/GITHUB_USERNAME/raktsetu-gnani
+- Repository: https://github.com/anshullmishra-png/raktsetu-gnani
 - Admin page: `/admin`, behind a passcode shared separately with the judges
