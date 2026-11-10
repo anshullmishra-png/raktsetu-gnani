@@ -97,9 +97,9 @@ select
     when g.grp = 'B+'  then 1 + h.r % 12
     when g.grp = 'A+'  then 1 + h.r % 10
     when g.grp = 'AB+' then h.r % 5
-    when h.r < 58 then 0          -- Rh-negative: usually none
-    when h.r < 82 then 1
-    when h.r < 94 then 2
+    when h.r < 75 then 0          -- Rh-negative: usually none
+    when h.r < 92 then 1
+    when h.r < 98 then 2
     else 3
   end,
   case g.grp

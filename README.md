@@ -10,6 +10,8 @@ Mishra and Agnesh M P. The project was started by Agnesh M P; the original
 repository is [`agneshmp07/raktsetu`](https://github.com/agneshmp07/raktsetu),
 and its commit history is kept in this one.
 
+Live demo: https://raktsetu-gnani.vercel.app
+
 **All data is synthetic.** The 55 blood banks, 8 hospitals, donors, stock
 levels and phone numbers are invented. No real call is placed anywhere, and no
 patient data is collected or stored.
@@ -105,7 +107,10 @@ against the deployed site and database).
 3. **No patient PII.** `requests` has no patient or free-text column, and the
    hospital must come from a fixed list (foreign key). Transcripts are
    redacted in code before storage: runs of 8 or more digits, names after
-   cues such as "my name is", and any spans the extractor flags.
+   cues such as "my name is", and any spans the extractor flags. A number the
+   extractor reports is only trusted if it was actually spoken, and a reply
+   that names a different blood group from the one asked about is flagged for
+   a person to review instead of acted on.
 4. **Human approval before any hold.** The model's tool list has no
    hold-placing tool; it has `propose_hold`. A hold row requires an approved
    proposal (`NOT NULL UNIQUE` foreign key plus a trigger), and
@@ -136,11 +141,54 @@ a shared demo passcode, not user authentication.
 ## Eval results
 
 <!-- EVAL:START -->
-_Not run yet. This section is filled only from `eval/run-eval.ts` output._
+Every number here comes from a real run on 10 Nov 2026. Nothing is estimated.
+
+**Human recordings: not run yet.** The 12 sentences in
+[`eval/sentences.md`](eval/sentences.md) (English, Hinglish, Hindi and Kannada,
+some with background noise) have not been recorded, so there is **no accuracy
+figure for human speech, for Hindi, for Kannada, for Hinglish or for noisy
+audio**. Kannada and Hindi are supported by Prisma v2.5 according to the docs;
+this project has not verified how well. When clips are added,
+`eval/run-eval.ts` writes `eval/RESULTS.md` and this section should be updated
+from it.
+
+**Machine-voice wiring check** ([`eval/RESULTS-tts.md`](eval/RESULTS-tts.md)):
+five English clips made with Windows text-to-speech, sent through Prisma v2.5
+and the same extraction and validation code the app uses. This shows the
+pipeline works end to end. It says little about real accuracy: a synthetic
+voice in a silent room is the easiest possible input.
+
+| Run | Result |
+|---|---|
+| First run | **4 of 5 passed.** The failure: Prisma returns lowercase text with no punctuation, so "Testname Demoperson" came back as "test name demo person" and the redaction, which relied on capital letters to find a surname, removed only the first word. |
+| After fixing the redaction to not depend on capitals | **5 of 5 passed**: units, hold and off-topic flag correct on all five, including the injection clip (refused) and the clip with a spoken name and phone number. |
+
+Still imperfect in that second run: the stored transcript reads "my name is
+[name removed] person". One fragment of the invented four-word name survived,
+because the rule removes at most three words after the cue.
+
+Other things the real transcripts showed: with `format=transcribe`, "thirty
+minutes" became "30 minutes" but "four units" stayed a word, so number words
+are still needed; and "first come, first served" became "1st come 1st served".
+The Hindi and Kannada number-word lists in the code have not been checked
+against real Prisma output.
+
+**Guardrail and compatibility tests** (run against the deployed site and
+database on 10 Nov 2026):
+
+| Suite | Result |
+|---|---|
+| `tests/logic.test.ts` (offline: compatibility table, redaction, injection, no hold-placing tool) | 16 of 16 passed |
+| `tests/live.test.ts` (deployed API plus database: all seven guardrails, hold lifecycle, donor privacy) | 19 of 19 passed |
+| `tests/smoke.mjs` (deployed site, real Gemini dispatch, real Prisma audio, approve, cancel, collect, pledge) | passed |
+
+The live suite's first run was 16 of 19; the three failures were mistakes in
+the test script, not in the system. Two later runs each lost one test to a
+network connection reset, which is why the test helper now retries on
+transport errors.
 <!-- EVAL:END -->
 
-The sentences and expectations are in [`eval/sentences.md`](eval/sentences.md)
-and [`eval/clips.json`](eval/clips.json).
+Expectations for each clip are in [`eval/clips.json`](eval/clips.json).
 
 ## Hold lifecycle
 
@@ -207,8 +255,10 @@ not evidence.
 ## Data
 
 55 fictional blood banks: 40 across Bengaluru and 15 in Kolar, Tumakuru,
-Ramanagara and Chikkaballapur. Rh-negative stock is deliberately scarce,
-matching the roughly 6 percent Rh-negative rate in the Indian population.
+Ramanagara and Chikkaballapur. Rh-negative stock is deliberately scarce
+(about 7 percent of seeded units, and most banks hold none of a given
+Rh-negative group), in line with the roughly 6 percent Rh-negative rate in
+the Indian population.
 About a fifth of listings are more than a day old. One bank is seeded with
 the opening story: 4 units of O- listed, last updated 31 hours ago.
 
@@ -247,7 +297,10 @@ the opening story: 4 units of O- listed, last updated 31 hours ago.
 - No login. Anyone with the link can file a request, approve a proposal or
   mark a hold collected. The admin passcode is shared.
 - PII redaction is pattern-based plus a model pass. It will miss a name
-  spoken without a cue if the extractor also misses it.
+  spoken without a cue if the extractor also misses it, and the eval shows it
+  can leave a fragment of a long name behind.
+- Speech accuracy is unmeasured for human voices, for Hindi, Kannada and
+  Hinglish, and for noisy audio. See Eval results.
 
 ## Running it
 
